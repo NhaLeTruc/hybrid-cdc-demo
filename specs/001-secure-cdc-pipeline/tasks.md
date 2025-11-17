@@ -78,35 +78,35 @@
 
 ### Tests for User Story 1 (TDD - Write FIRST, ensure FAIL before implementation) ⚠️
 
-- [ ] T033 [P] [US1] Create tests/unit/test_event_parsing.py for CDC event parsing logic
-- [ ] T034 [P] [US1] Create tests/unit/test_offset_management.py for offset read/write/commit logic
-- [ ] T035 [P] [US1] Create tests/contract/test_event_schema.py validating ChangeEvent against event-schema.json
-- [ ] T036 [P] [US1] Create tests/contract/test_offset_schema.py validating ReplicationOffset against offset-schema.json
-- [ ] T037 [P] [US1] Create tests/integration/test_cassandra_to_postgres.py for end-to-end Cassandra → Postgres replication
-- [ ] T038 [P] [US1] Create tests/integration/test_cassandra_to_clickhouse.py for end-to-end Cassandra → ClickHouse replication
-- [ ] T039 [P] [US1] Create tests/integration/test_cassandra_to_timescaledb.py for end-to-end Cassandra → TimescaleDB replication
-- [ ] T040 [US1] Create tests/integration/test_exactly_once.py verifying no duplicates after pipeline restart
-- [ ] T041 [US1] Create tests/integration/test_crash_recovery.py simulating crash mid-batch and verifying offset recovery
+- [x] T033 [P] [US1] Create tests/unit/test_event_parsing.py for CDC event parsing logic
+- [x] T034 [P] [US1] Create tests/unit/test_offset_management.py for offset read/write/commit logic
+- [x] T035 [P] [US1] Create tests/contract/test_event_schema.py validating ChangeEvent against event-schema.json
+- [x] T036 [P] [US1] Create tests/contract/test_offset_schema.py validating ReplicationOffset against offset-schema.json
+- [x] T037 [P] [US1] Create tests/integration/test_cassandra_to_postgres.py for end-to-end Cassandra → Postgres replication
+- [x] T038 [P] [US1] Create tests/integration/test_cassandra_to_clickhouse.py for end-to-end Cassandra → ClickHouse replication
+- [x] T039 [P] [US1] Create tests/integration/test_cassandra_to_timescaledb.py for end-to-end Cassandra → TimescaleDB replication
+- [x] T040 [US1] Create tests/integration/test_exactly_once.py verifying no duplicates after pipeline restart
+- [x] T041 [US1] Create tests/integration/test_crash_recovery.py simulating crash mid-batch and verifying offset recovery
 
 ### Implementation for User Story 1
 
-- [ ] T042 Create src/cdc/__init__.py (empty)
-- [ ] T043 [US1] Implement src/cdc/reader.py with Cassandra CDC commitlog reader (read commitlog files from cdc_raw directory)
-- [ ] T044 [US1] Implement src/cdc/parser.py to parse binary commitlog format into ChangeEvent objects
-- [ ] T045 [US1] Implement src/cdc/offset.py with offset management (read last offset, update offset, atomic commit)
-- [ ] T046 Create src/sinks/__init__.py (empty)
-- [ ] T047 [US1] Create src/sinks/base.py with abstract BaseSink interface (connect, write_batch, commit_offset, health_check methods)
-- [ ] T048 [P] [US1] Implement src/sinks/postgres.py with PostgresSink (psycopg async, INSERT ON CONFLICT, transactional offset commit)
-- [ ] T049 [P] [US1] Implement src/sinks/clickhouse.py with ClickHouseSink (clickhouse-driver, ReplacingMergeTree, separate offset table)
-- [ ] T050 [P] [US1] Implement src/sinks/timescaledb.py with TimescaleDBSink (inherit from PostgresSink, TimescaleDB hypertable support)
-- [ ] T051 [US1] Create src/main.py with pipeline entrypoint (parse config, initialize sinks, start CDC reader loop)
-- [ ] T052 [US1] Implement async event batching logic in src/main.py (micro-batching with configurable batch_size)
-- [ ] T053 [US1] Implement parallel sink writes in src/main.py (asyncio concurrent writes to all 3 warehouses)
-- [ ] T054 [US1] Implement backpressure handling in src/main.py (semaphores limiting in-flight batches per sink)
-- [ ] T055 [US1] Add offset commit logic after successful batch writes in src/main.py
-- [ ] T056 [US1] Create database migration scripts in scripts/create-offset-table.sql for Postgres _cdc_offsets table
-- [ ] T057 [US1] Update scripts/setup-local-env.sh to create destination tables in Postgres, ClickHouse, TimescaleDB
-- [ ] T058 [US1] Run all User Story 1 tests and verify they pass
+- [x] T042 Create src/cdc/__init__.py (empty)
+- [x] T043 [US1] Implement src/cdc/reader.py with Cassandra CDC commitlog reader (read commitlog files from cdc_raw directory)
+- [x] T044 [US1] Implement src/cdc/parser.py to parse binary commitlog format into ChangeEvent objects
+- [x] T045 [US1] Implement src/cdc/offset.py with offset management (read last offset, update offset, atomic commit)
+- [x] T046 Create src/sinks/__init__.py (empty)
+- [x] T047 [US1] Create src/sinks/base.py with abstract BaseSink interface (connect, write_batch, commit_offset, health_check methods)
+- [x] T048 [P] [US1] Implement src/sinks/postgres.py with PostgresSink (psycopg async, INSERT ON CONFLICT, transactional offset commit)
+- [x] T049 [P] [US1] Implement src/sinks/clickhouse.py with ClickHouseSink (clickhouse-driver, ReplacingMergeTree, separate offset table)
+- [x] T050 [P] [US1] Implement src/sinks/timescaledb.py with TimescaleDBSink (inherit from PostgresSink, TimescaleDB hypertable support)
+- [x] T051 [US1] Create src/main.py with pipeline entrypoint (parse config, initialize sinks, start CDC reader loop)
+- [x] T052 [US1] Implement async event batching logic in src/main.py (micro-batching with configurable batch_size)
+- [x] T053 [US1] Implement parallel sink writes in src/main.py (asyncio concurrent writes to all 3 warehouses)
+- [x] T054 [US1] Implement backpressure handling in src/main.py (semaphores limiting in-flight batches per sink)
+- [x] T055 [US1] Add offset commit logic after successful batch writes in src/main.py
+- [x] T056 [US1] Create database migration scripts in scripts/create-offset-table.sql for Postgres _cdc_offsets table
+- [x] T057 [US1] Update scripts/setup-local-env.sh to create destination tables in Postgres, ClickHouse, TimescaleDB
+- [x] T058 [US1] Run all User Story 1 tests and verify they pass
 
 **Checkpoint**: User Story 1 complete and independently testable. Pipeline replicates data with exactly-once delivery.
 
@@ -120,27 +120,27 @@
 
 ### Tests for User Story 2 (TDD - Write FIRST, ensure FAIL before implementation) ⚠️
 
-- [ ] T059 [P] [US2] Create tests/unit/test_masking.py for SHA-256 hashing and HMAC tokenization functions
-- [ ] T060 [P] [US2] Create tests/unit/test_schema_mapper.py for Cassandra → warehouse type mapping logic
-- [ ] T061 [P] [US2] Create tests/contract/test_type_conversions.py validating type mappings preserve semantics
-- [ ] T062 [US2] Create tests/integration/test_pii_masking.py verifying PII fields (email, phone, SSN) are hashed in warehouses
-- [ ] T063 [US2] Create tests/integration/test_phi_masking.py verifying PHI fields (medical_record_number) are tokenized
-- [ ] T064 [US2] Create tests/integration/test_masking_configuration.py verifying masking-rules.yaml is correctly applied
+- [x] T059 [P] [US2] Create tests/unit/test_masking.py for SHA-256 hashing and HMAC tokenization functions
+- [x] T060 [P] [US2] Create tests/unit/test_schema_mapper.py for Cassandra → warehouse type mapping logic
+- [x] T061 [P] [US2] Create tests/contract/test_type_conversions.py validating type mappings preserve semantics
+- [x] T062 [US2] Create tests/integration/test_pii_masking.py verifying PII fields (email, phone, SSN) are hashed in warehouses
+- [x] T063 [US2] Create tests/integration/test_phi_masking.py verifying PHI fields (medical_record_number) are tokenized
+- [x] T064 [US2] Create tests/integration/test_masking_configuration.py verifying masking-rules.yaml is correctly applied
 
 ### Implementation for User Story 2
 
-- [ ] T065 Create src/transform/__init__.py (empty)
-- [ ] T066 [US2] Implement src/transform/masking.py with SHA-256 hashing function for PII fields
-- [ ] T067 [US2] Implement HMAC tokenization function in src/transform/masking.py for PHI fields
-- [ ] T068 [US2] Implement masking rule loader in src/transform/masking.py (read masking-rules.yaml, classify fields)
-- [ ] T069 [US2] Create src/transform/schema_mapper.py to load schema-mappings.yaml and map Cassandra types to warehouse types
-- [ ] T070 [US2] Implement type conversion functions in src/transform/schema_mapper.py (UUID, TIMESTAMP, MAP→JSON, SET→ARRAY)
-- [ ] T071 [US2] Create src/transform/validator.py to validate event schema against SchemaVersion
-- [ ] T072 [US2] Create src/models/masked_field.py with MaskedField dataclass per data-model.md
-- [ ] T073 [US2] Integrate masking logic into src/main.py pipeline (apply masking before sink writes)
-- [ ] T074 [US2] Add audit logging for masked fields in src/observability/logging.py (log field_name, classification, masking_strategy)
-- [ ] T075 [US2] Update sink implementations to write masked values (src/sinks/postgres.py, clickhouse.py, timescaledb.py)
-- [ ] T076 [US2] Run all User Story 2 tests and verify they pass
+- [x] T065 Create src/transform/__init__.py (empty)
+- [x] T066 [US2] Implement src/transform/masking.py with SHA-256 hashing function for PII fields
+- [x] T067 [US2] Implement HMAC tokenization function in src/transform/masking.py for PHI fields
+- [x] T068 [US2] Implement masking rule loader in src/transform/masking.py (read masking-rules.yaml, classify fields)
+- [x] T069 [US2] Create src/transform/schema_mapper.py to load schema-mappings.yaml and map Cassandra types to warehouse types
+- [x] T070 [US2] Implement type conversion functions in src/transform/schema_mapper.py (UUID, TIMESTAMP, MAP→JSON, SET→ARRAY)
+- [x] T071 [US2] Create src/transform/validator.py to validate event schema against SchemaVersion
+- [x] T072 [US2] Create src/models/masked_field.py with MaskedField dataclass per data-model.md
+- [x] T073 [US2] Integrate masking logic into src/main.py pipeline (apply masking before sink writes)
+- [x] T074 [US2] Add audit logging for masked fields in src/observability/logging.py (log field_name, classification, masking_strategy)
+- [x] T075 [US2] Update sink implementations to write masked values (src/sinks/postgres.py, clickhouse.py, timescaledb.py)
+- [x] T076 [US2] Run all User Story 2 tests and verify they pass
 
 **Checkpoint**: User Stories 1 AND 2 both work independently. PII/PHI fields are masked in warehouses.
 
