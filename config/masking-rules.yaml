@@ -1,0 +1,61 @@
+# PII/PHI Masking Rules Configuration
+# Defines which fields should be masked and how
+
+# Table-specific masking rules
+tables:
+  users:
+    pii_fields:
+      - email          # SHA-256 hashed
+      - phone          # SHA-256 hashed
+      - ssn            # SHA-256 hashed
+      - address        # SHA-256 hashed
+    phi_fields: []     # No PHI in users table
+    sensitive_fields: []
+
+  patients:
+    pii_fields:
+      - email
+      - phone
+      - ssn
+    phi_fields:
+      - medical_record_number  # HMAC tokenization
+      - diagnosis              # HMAC tokenization
+      - prescription           # HMAC tokenization
+    sensitive_fields: []
+
+  orders:
+    pii_fields: []     # No PII in orders table
+    phi_fields: []
+    sensitive_fields: []
+
+  sessions:
+    pii_fields: []
+    phi_fields: []
+    sensitive_fields:
+      - session_token  # Passthrough (already encrypted)
+
+# Global masking configuration
+masking:
+  # PII masking strategy: SHA-256 (irreversible hashing)
+  pii_strategy: "hash"
+  pii_algorithm: "sha256"
+  pii_salt: null  # Salt loaded from environment variable CDC_PII_SALT
+
+  # PHI masking strategy: HMAC (deterministic tokenization)
+  phi_strategy: "hmac"
+  phi_algorithm: "hmac-sha256"
+  phi_key_id: "primary"  # Key loaded from environment variable CDC_PHI_KEY
+
+  # Sensitive data strategy: Passthrough (no transformation)
+  sensitive_strategy: "passthrough"
+
+# Audit configuration
+audit:
+  # Log all masking operations
+  log_masked_fields: true
+
+  # Include original field names in audit log
+  log_field_names: true
+
+  # Include masking strategy in audit log
+  log_masking_strategy: true

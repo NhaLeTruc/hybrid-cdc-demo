@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+.venv/
+ENV/
+env/
+.virtualenv/
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.crt
+secrets/
+
+# Project Specific
+data/
+logs/
+*.log
+*.log.*
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.directory
+
+# Temporary Files
+*.tmp
+*.bak
+*.orig
+
+# Dead Letter Queue
+data/dlq/*.jsonl

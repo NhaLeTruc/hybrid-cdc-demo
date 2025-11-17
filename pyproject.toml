@@ -1,0 +1,125 @@
+[project]
+name = "hybrid-cdc-demo"
+version = "0.1.0"
+description = "Secure multi-destination CDC pipeline for Cassandra to Postgres, ClickHouse, and TimescaleDB"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "CDC Pipeline Team", email = "team@example.com"}
+]
+keywords = ["cdc", "cassandra", "postgres", "clickhouse", "timescaledb", "data-replication"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/NhaLeTruc/hybrid-cdc-demo"
+Documentation = "https://github.com/NhaLeTruc/hybrid-cdc-demo/tree/main/specs/001-secure-cdc-pipeline"
+Repository = "https://github.com/NhaLeTruc/hybrid-cdc-demo.git"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = "--verbose --strict-markers --cov=src --cov-report=term-missing --cov-report=html"
+markers = [
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (require Docker)",
+    "contract: Contract tests (schema validation)",
+    "chaos: Chaos engineering tests (Toxiproxy)",
+    "performance: Performance benchmarks",
+    "slow: Slow-running tests"
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "tests/*",
+    "**/__pycache__/*",
+    "**/conftest.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod"
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+
+[tool.isort]
+profile = "black"
+line_length = 100
