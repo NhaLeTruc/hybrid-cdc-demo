@@ -6,21 +6,22 @@ Orchestrates reading from Cassandra CDC and writing to multiple destinations
 import asyncio
 import signal
 import sys
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 import structlog
 
-from src.config.settings import CDCSettings
-from src.config.loader import load_config
-from src.cdc.reader import CommitLogReader
 from src.cdc.offset import OffsetManager
-from src.sinks.postgres import PostgresSink
-from src.sinks.clickhouse import ClickHouseSink
-from src.sinks.timescaledb import TimescaleDBSink
-from src.sinks.base import BaseSink
+from src.cdc.reader import CommitLogReader
+from src.config.loader import load_config
+from src.config.settings import CDCSettings
 from src.models.event import ChangeEvent
 from src.models.offset import Destination
 from src.observability.logging import configure_logging
 from src.observability.metrics import start_metrics_server
+from src.sinks.base import BaseSink
+from src.sinks.clickhouse import ClickHouseSink
+from src.sinks.postgres import PostgresSink
+from src.sinks.timescaledb import TimescaleDBSink
 
 logger = structlog.get_logger(__name__)
 
@@ -107,7 +108,9 @@ class CDCPipeline:
                 await sink.disconnect()
                 logger.info("Sink disconnected", destination=destination.value)
             except Exception as e:
-                logger.error("Error disconnecting sink", destination=destination.value, error=str(e))
+                logger.error(
+                    "Error disconnecting sink", destination=destination.value, error=str(e)
+                )
 
     async def process_batch(
         self,
@@ -211,7 +214,12 @@ class CDCPipeline:
                 if offset:
                     last_file = offset.commitlog_file
                     last_position = offset.commitlog_position
-                    logger.info("Resuming from offset", destination=destination.value, file=last_file, position=last_position)
+                    logger.info(
+                        "Resuming from offset",
+                        destination=destination.value,
+                        file=last_file,
+                        position=last_position,
+                    )
 
             # Start polling for events
             batch: List[ChangeEvent] = []

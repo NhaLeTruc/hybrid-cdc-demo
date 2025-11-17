@@ -3,10 +3,10 @@ Integration test for Cassandra → Postgres replication
 End-to-end test of CDC pipeline from Cassandra to Postgres warehouse
 """
 
-import pytest
-import asyncio
-from uuid import uuid4
 from datetime import datetime, timezone
+from uuid import uuid4
+
+import pytest
 
 
 @pytest.mark.asyncio
@@ -122,7 +122,14 @@ class TestCassandraToPostgres:
                 INSERT INTO users (user_id, email, first_name, last_name, age, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, f"user{i}@example.com", f"User{i}", "Test", 20 + i, datetime.now(timezone.utc)),
+                (
+                    user_id,
+                    f"user{i}@example.com",
+                    f"User{i}",
+                    "Test",
+                    20 + i,
+                    datetime.now(timezone.utc),
+                ),
             )
 
         # Wait for CDC to process all

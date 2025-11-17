@@ -3,11 +3,10 @@ Integration test for crash recovery
 Simulates crash mid-batch and verifies offset recovery
 """
 
-import pytest
-import signal
-import asyncio
-from uuid import uuid4
 from datetime import datetime, timezone
+from uuid import uuid4
+
+import pytest
 
 
 @pytest.mark.asyncio
@@ -29,7 +28,14 @@ class TestCrashRecovery:
                 INSERT INTO users (user_id, email, first_name, last_name, age, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, f"user{i}@example.com", f"User{i}", "Test", 20, datetime.now(timezone.utc)),
+                (
+                    user_id,
+                    f"user{i}@example.com",
+                    f"User{i}",
+                    "Test",
+                    20,
+                    datetime.now(timezone.utc),
+                ),
             )
 
         # Process 10 events, then simulate crash
@@ -77,7 +83,14 @@ class TestCrashRecovery:
                 INSERT INTO users (user_id, email, first_name, last_name, age, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, f"user{i}@example.com", f"User{i}", "Test", 20, datetime.now(timezone.utc)),
+                (
+                    user_id,
+                    f"user{i}@example.com",
+                    f"User{i}",
+                    "Test",
+                    20,
+                    datetime.now(timezone.utc),
+                ),
             )
 
         # Start processing batch but crash before commit
@@ -105,7 +118,14 @@ class TestCrashRecovery:
                 INSERT INTO users (user_id, email, first_name, last_name, age, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, f"user{i}@example.com", f"User{i}", "Test", 20, datetime.now(timezone.utc)),
+                (
+                    user_id,
+                    f"user{i}@example.com",
+                    f"User{i}",
+                    "Test",
+                    20,
+                    datetime.now(timezone.utc),
+                ),
             )
 
         # Start pipeline and send SIGTERM after some processing
@@ -159,7 +179,14 @@ class TestCrashRecovery:
                 INSERT INTO users (user_id, email, first_name, last_name, age, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, f"user{i}@example.com", f"User{i}", "Test", 20, datetime.now(timezone.utc)),
+                (
+                    user_id,
+                    f"user{i}@example.com",
+                    f"User{i}",
+                    "Test",
+                    20,
+                    datetime.now(timezone.utc),
+                ),
             )
 
         # Simulate:

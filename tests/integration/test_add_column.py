@@ -3,9 +3,10 @@ Integration test for ADD COLUMN schema change handling
 Verifies pipeline handles column additions gracefully
 """
 
-import pytest
-from uuid import uuid4
 from datetime import datetime, timezone
+from uuid import uuid4
+
+import pytest
 
 
 @pytest.mark.integration
@@ -13,9 +14,7 @@ from datetime import datetime, timezone
 class TestAddColumn:
     """Test pipeline handling of ADD COLUMN schema changes"""
 
-    async def test_add_column_to_existing_table(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_add_column_to_existing_table(self, cassandra_session, postgres_connection):
         """Test that pipeline handles ADD COLUMN without data loss"""
         # Setup: Create initial table with 2 columns
         cassandra_session.execute(
@@ -76,9 +75,7 @@ class TestAddColumn:
 
         pass
 
-    async def test_add_column_with_default_value(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_add_column_with_default_value(self, cassandra_session, postgres_connection):
         """Test ADD COLUMN with default value"""
         # Create table
         cassandra_session.execute(
@@ -271,9 +268,7 @@ class TestAddColumn:
 
         pass
 
-    async def test_add_column_preserves_existing_data(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_add_column_preserves_existing_data(self, cassandra_session, postgres_connection):
         """Test that existing data is preserved when column is added"""
         cassandra_session.execute(
             """

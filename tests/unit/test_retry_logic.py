@@ -3,8 +3,9 @@ Unit tests for retry logic
 Tests exponential backoff with jitter
 """
 
-import pytest
 import time
+
+import pytest
 
 
 class TestRetryLogic:
@@ -73,7 +74,7 @@ class TestRetryLogic:
     @pytest.mark.asyncio
     async def test_retry_decorator_success_on_first_attempt(self):
         """Test that successful operations don't retry"""
-        from src.sinks.retry import with_retry, RetryPolicy
+        from src.sinks.retry import RetryPolicy, with_retry
 
         call_count = 0
 
@@ -91,7 +92,7 @@ class TestRetryLogic:
     @pytest.mark.asyncio
     async def test_retry_decorator_retries_on_failure(self):
         """Test that failures trigger retries"""
-        from src.sinks.retry import with_retry, RetryPolicy
+        from src.sinks.retry import RetryPolicy, with_retry
 
         call_count = 0
 
@@ -111,7 +112,7 @@ class TestRetryLogic:
     @pytest.mark.asyncio
     async def test_retry_gives_up_after_max_attempts(self):
         """Test that retry gives up after max attempts"""
-        from src.sinks.retry import with_retry, RetryPolicy
+        from src.sinks.retry import RetryPolicy, with_retry
 
         call_count = 0
 
@@ -128,8 +129,6 @@ class TestRetryLogic:
 
     def test_classify_error_as_retryable(self):
         """Test error classification as retryable"""
-        from src.sinks.retry import is_retryable_error
-        import psycopg.errors
 
         # Connection errors should be retryable
         # assert is_retryable_error(ConnectionError("Connection lost"))

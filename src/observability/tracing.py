@@ -6,10 +6,9 @@ Full implementation in Phase 5 (User Story 3)
 from typing import Optional
 
 from opentelemetry import trace
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.sdk.resources import Resource, SERVICE_NAME
-
 
 # Global tracer instance
 tracer: Optional[trace.Tracer] = None

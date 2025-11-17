@@ -3,8 +3,9 @@ Integration test for health check functionality
 Verifies dependency health detection and reporting
 """
 
-import pytest
 import asyncio
+
+import pytest
 
 
 @pytest.mark.asyncio
@@ -49,7 +50,6 @@ class TestHealthChecks:
 
     async def test_health_check_detects_down_database(self):
         """Test health check detects when database is down"""
-        from src.observability.health import check_postgres_health
 
         # Configure health check with invalid connection
         # ... setup invalid connection
@@ -92,8 +92,8 @@ class TestHealthChecks:
         """Test that health checks can run concurrently"""
         from src.observability.health import (
             check_cassandra_health,
-            check_postgres_health,
             check_clickhouse_health,
+            check_postgres_health,
             check_timescaledb_health,
         )
 
@@ -112,7 +112,6 @@ class TestHealthChecks:
 
     async def test_health_check_timeout(self):
         """Test that health check times out for slow databases"""
-        from src.observability.health import check_postgres_health
 
         # Configure with slow/hanging connection
         # ... setup slow connection

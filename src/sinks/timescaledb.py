@@ -3,13 +3,14 @@ TimescaleDB Sink
 Writes CDC events to TimescaleDB warehouse with hypertable support
 """
 
-import structlog
 from typing import List
 
-from src.sinks.postgres import PostgresSink
-from src.sinks.base import SinkError
+import structlog
+
 from src.models.event import ChangeEvent
 from src.models.offset import Destination
+from src.sinks.base import SinkError
+from src.sinks.postgres import PostgresSink
 
 logger = structlog.get_logger(__name__)
 
@@ -152,7 +153,9 @@ class TimescaleDBSink(PostgresSink):
         try:
             async with self._conn.cursor() as cur:
                 # Check TimescaleDB version
-                await cur.execute("SELECT extversion FROM pg_extension WHERE extname = 'timescaledb'")
+                await cur.execute(
+                    "SELECT extversion FROM pg_extension WHERE extname = 'timescaledb'"
+                )
                 version = await cur.fetchone()
                 if version:
                     logger.debug("TimescaleDB version", version=version[0])

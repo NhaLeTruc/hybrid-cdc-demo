@@ -3,8 +3,8 @@ Chaos test for slow destination scenarios
 Tests backpressure handling and timeout behavior
 """
 
+
 import pytest
-import asyncio
 
 
 @pytest.mark.chaos

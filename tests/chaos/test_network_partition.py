@@ -3,8 +3,8 @@ Chaos test for network partition scenarios
 Uses Toxiproxy to simulate network failures
 """
 
+
 import pytest
-import asyncio
 
 
 @pytest.mark.chaos

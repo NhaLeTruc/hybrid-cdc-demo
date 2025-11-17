@@ -6,7 +6,8 @@ Handles transient failures with configurable retry policies
 import asyncio
 import random
 from dataclasses import dataclass
-from typing import Callable, TypeVar, Optional
+from typing import Callable, Optional, TypeVar
+
 import structlog
 
 logger = structlog.get_logger(__name__)

@@ -3,7 +3,7 @@ ChangeEvent Data Model - CDC event representation
 Based on specs/001-secure-cdc-pipeline/data-model.md
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional

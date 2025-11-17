@@ -4,13 +4,14 @@ Writes CDC events to Postgres warehouse using async psycopg
 """
 
 from typing import List, Optional
+
 import structlog
 from psycopg import AsyncConnection
 from psycopg.rows import dict_row
 
-from src.sinks.base import BaseSink, SinkError
 from src.models.event import ChangeEvent, EventType
-from src.models.offset import ReplicationOffset, Destination
+from src.models.offset import Destination, ReplicationOffset
+from src.sinks.base import BaseSink, SinkError
 
 logger = structlog.get_logger(__name__)
 
@@ -116,7 +117,9 @@ class PostgresSink(BaseSink):
                         values = list(all_columns.values())
 
                         # Primary key for ON CONFLICT (partition + clustering keys)
-                        pk_cols = list(event.partition_key.keys()) + list(event.clustering_key.keys())
+                        pk_cols = list(event.partition_key.keys()) + list(
+                            event.clustering_key.keys()
+                        )
 
                         # Build INSERT ... ON CONFLICT query
                         query = f"""

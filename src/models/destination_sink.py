@@ -5,8 +5,8 @@ Tracks state and health of each destination sink
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Optional
 from enum import Enum
+from typing import Optional
 
 from src.models.offset import Destination
 
@@ -120,7 +120,9 @@ class DestinationSink:
         return {
             "destination": self.destination.value,
             "health": self.health.value,
-            "last_health_check": self.last_health_check.isoformat() if self.last_health_check else None,
+            "last_health_check": (
+                self.last_health_check.isoformat() if self.last_health_check else None
+            ),
             "latency_ms": self.latency_ms,
             "events_written": self.events_written,
             "errors_count": self.errors_count,

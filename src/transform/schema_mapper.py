@@ -5,10 +5,12 @@ Handles schema evolution and incompatibility detection
 """
 
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Set
-import yaml
+from typing import Any, Dict, List, Optional
+
 import structlog
-from src.models.schema import TableSchema, SchemaChange, ChangeType
+import yaml
+
+from src.models.schema import ChangeType, SchemaChange, TableSchema
 
 logger = structlog.get_logger(__name__)
 
@@ -40,7 +42,9 @@ class SchemaMapper:
             global_mappings = mappings.get("global_mappings", {})
             self.postgres_mappings = global_mappings.get("cassandra_to_postgres", {})
             self.clickhouse_mappings = global_mappings.get("cassandra_to_clickhouse", {})
-            self.timescaledb_mappings = global_mappings.get("cassandra_to_timescaledb", self.postgres_mappings)
+            self.timescaledb_mappings = global_mappings.get(
+                "cassandra_to_timescaledb", self.postgres_mappings
+            )
 
             logger.info("Schema mappings loaded")
 
@@ -131,9 +135,7 @@ class SchemaMapper:
         else:
             return self.postgres_mappings
 
-    def detect_incompatible_types(
-        self, cassandra_type: str, target_warehouse: str
-    ) -> bool:
+    def detect_incompatible_types(self, cassandra_type: str, target_warehouse: str) -> bool:
         """
         Detect if a Cassandra type cannot be mapped to target warehouse
 
@@ -174,9 +176,7 @@ class SchemaMapper:
 
         return False
 
-    def get_incompatible_columns(
-        self, schema: TableSchema, target_warehouse: str
-    ) -> List[str]:
+    def get_incompatible_columns(self, schema: TableSchema, target_warehouse: str) -> List[str]:
         """
         Get list of columns with incompatible types
 
@@ -195,9 +195,7 @@ class SchemaMapper:
 
         return incompatible
 
-    def is_schema_change_compatible(
-        self, change: SchemaChange, target_warehouse: str
-    ) -> bool:
+    def is_schema_change_compatible(self, change: SchemaChange, target_warehouse: str) -> bool:
         """
         Check if a schema change is compatible with target warehouse
 

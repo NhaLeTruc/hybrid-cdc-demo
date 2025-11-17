@@ -3,14 +3,15 @@ Health Check System for CDC Pipeline
 Monitors health of Cassandra and all destination warehouses
 """
 
-import time
 import asyncio
-from typing import Dict, Tuple, Optional
-from datetime import datetime, timezone
-import structlog
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import threading
+import time
+from datetime import datetime, timezone
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Dict, Optional, Tuple
+
+import structlog
 
 from src.config.settings import CDCSettings
 
@@ -146,7 +147,9 @@ async def check_postgres_health(
         start_time = time.time()
 
         # Create connection and execute simple query
-        async with await AsyncConnection.connect(connection_url, connect_timeout=timeout_seconds) as conn:
+        async with await AsyncConnection.connect(
+            connection_url, connect_timeout=timeout_seconds
+        ) as conn:
             async with conn.cursor() as cur:
                 await cur.execute("SELECT 1")
                 await cur.fetchone()
@@ -222,9 +225,13 @@ async def check_timescaledb_health(
         start_time = time.time()
 
         # Create connection and check TimescaleDB extension
-        async with await AsyncConnection.connect(connection_url, connect_timeout=timeout_seconds) as conn:
+        async with await AsyncConnection.connect(
+            connection_url, connect_timeout=timeout_seconds
+        ) as conn:
             async with conn.cursor() as cur:
-                await cur.execute("SELECT extversion FROM pg_extension WHERE extname = 'timescaledb'")
+                await cur.execute(
+                    "SELECT extversion FROM pg_extension WHERE extname = 'timescaledb'"
+                )
                 result = await cur.fetchone()
                 if not result:
                     raise Exception("TimescaleDB extension not found")
@@ -271,7 +278,10 @@ async def check_all_dependencies() -> Dict[str, Dict[str, any]]:
                 "latency_ms": latency_ms,
             }
 
-    logger.info("Health check completed", healthy_count=sum(1 for d in dependencies.values() if d["status"] == "up"))
+    logger.info(
+        "Health check completed",
+        healthy_count=sum(1 for d in dependencies.values() if d["status"] == "up"),
+    )
     return dependencies
 
 

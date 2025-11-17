@@ -3,9 +3,10 @@ Integration test for exactly-once delivery guarantees
 Verifies no duplicates after pipeline restart
 """
 
-import pytest
-from uuid import uuid4
 from datetime import datetime, timezone
+from uuid import uuid4
+
+import pytest
 
 
 @pytest.mark.asyncio
@@ -97,7 +98,14 @@ class TestExactlyOnceDelivery:
                 INSERT INTO users (user_id, email, first_name, last_name, age, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, f"user{i}@example.com", f"User{i}", "Test", 20, datetime.now(timezone.utc)),
+                (
+                    user_id,
+                    f"user{i}@example.com",
+                    f"User{i}",
+                    "Test",
+                    20,
+                    datetime.now(timezone.utc),
+                ),
             )
 
         # Process first 5 events

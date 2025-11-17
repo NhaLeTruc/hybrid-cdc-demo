@@ -4,11 +4,12 @@ Abstract base class for all destination sinks
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
+
 import structlog
 
 from src.models.event import ChangeEvent
-from src.models.offset import ReplicationOffset, Destination
+from src.models.offset import Destination, ReplicationOffset
 
 logger = structlog.get_logger(__name__)
 

@@ -3,14 +3,11 @@ Unit tests for schema mapper
 Tests Cassandra → warehouse type mapping logic
 """
 
-import pytest
-from uuid import UUID
-from datetime import datetime
 
 from src.transform.schema_mapper import (
     SchemaMapper,
-    map_cassandra_to_postgres,
     map_cassandra_to_clickhouse,
+    map_cassandra_to_postgres,
     map_cassandra_to_timescaledb,
 )
 

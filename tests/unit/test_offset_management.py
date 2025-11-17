@@ -3,11 +3,12 @@ Unit tests for offset management logic
 Tests offset read/write/commit operations for exactly-once delivery
 """
 
-import pytest
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from src.models.offset import ReplicationOffset, Destination
+import pytest
+
+from src.models.offset import Destination, ReplicationOffset
 
 
 class TestOffsetManagement:
@@ -37,7 +38,10 @@ class TestOffsetManagement:
 
         # Should return None when no offset exists
         offset = manager.read_offset(
-            table_name="users", keyspace="ecommerce", partition_id=42, destination=Destination.POSTGRES
+            table_name="users",
+            keyspace="ecommerce",
+            partition_id=42,
+            destination=Destination.POSTGRES,
         )
 
         # Initially should be None (no offset stored)

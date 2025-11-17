@@ -3,10 +3,12 @@ Schema validation for CDC events
 Validates events against current schema and detects incompatibilities
 """
 
+from typing import Any, Dict, List, Optional
+
 import structlog
-from typing import Dict, Any, Optional, List
+
 from src.models.event import ChangeEvent
-from src.models.schema import TableSchema, SchemaChange, ChangeType
+from src.models.schema import SchemaChange, TableSchema
 
 logger = structlog.get_logger(__name__)
 
@@ -103,9 +105,7 @@ class SchemaValidator:
             )
             # Don't fail - this might be a schema change we need to detect
 
-    def is_schema_compatible(
-        self, old_schema: TableSchema, new_schema: TableSchema
-    ) -> bool:
+    def is_schema_compatible(self, old_schema: TableSchema, new_schema: TableSchema) -> bool:
         """
         Check if schema change is compatible
 
@@ -153,9 +153,7 @@ class SchemaValidator:
         changes = old_schema.compare(new_schema)
         return [change for change in changes if not change.is_compatible()]
 
-    def validate_column_type(
-        self, column_name: str, value: Any, expected_type: str
-    ) -> bool:
+    def validate_column_type(self, column_name: str, value: Any, expected_type: str) -> bool:
         """
         Validate that a column value matches expected type
 

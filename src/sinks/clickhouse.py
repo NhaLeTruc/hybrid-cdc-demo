@@ -4,12 +4,13 @@ Writes CDC events to ClickHouse warehouse using clickhouse-driver
 """
 
 from typing import List, Optional
+
 import structlog
 from clickhouse_driver import Client
 
-from src.sinks.base import BaseSink, SinkError
 from src.models.event import ChangeEvent, EventType
-from src.models.offset import ReplicationOffset, Destination
+from src.models.offset import Destination, ReplicationOffset
+from src.sinks.base import BaseSink, SinkError
 
 logger = structlog.get_logger(__name__)
 
@@ -109,7 +110,9 @@ class ClickHouseSink(BaseSink):
                     # ClickHouse doesn't support DELETE in standard way
                     # We'll insert a "tombstone" record with a special marker
                     # or skip deletes for analytics warehouse
-                    logger.warning("DELETE events not fully supported in ClickHouse", table=event.table_name)
+                    logger.warning(
+                        "DELETE events not fully supported in ClickHouse", table=event.table_name
+                    )
                     continue
 
                 else:

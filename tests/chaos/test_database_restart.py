@@ -3,8 +3,8 @@ Chaos test for database restart scenarios
 Tests connection recovery and state restoration
 """
 
+
 import pytest
-import asyncio
 
 
 @pytest.mark.chaos
