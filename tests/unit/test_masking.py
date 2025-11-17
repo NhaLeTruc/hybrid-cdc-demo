@@ -3,15 +3,12 @@ Unit tests for PII/PHI masking functions
 Tests SHA-256 hashing and HMAC tokenization
 """
 
-import pytest
-import hashlib
-import hmac
 
 from src.transform.masking import (
-    mask_pii_field,
-    mask_phi_field,
-    load_masking_rules,
     MaskingStrategy,
+    load_masking_rules,
+    mask_phi_field,
+    mask_pii_field,
 )
 
 

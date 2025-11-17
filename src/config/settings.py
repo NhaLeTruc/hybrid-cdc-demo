@@ -128,9 +128,7 @@ class CDCSettings(BaseSettings):
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
 
     # Configuration file paths
-    config_file: str = Field(
-        default="config/pipeline.yaml", description="Path to main config file"
-    )
+    config_file: str = Field(default="config/pipeline.yaml", description="Path to main config file")
     masking_rules_file: str = Field(
         default="config/masking-rules.yaml", description="Path to masking rules"
     )

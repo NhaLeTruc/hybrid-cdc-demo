@@ -3,9 +3,9 @@ Unit tests for CDC event parsing logic
 Tests the parser module that converts commitlog binary format into ChangeEvent objects
 """
 
-import pytest
 from datetime import datetime, timezone
-from uuid import UUID, uuid4
+
+import pytest
 
 from src.models.event import ChangeEvent, EventType
 
@@ -115,7 +115,7 @@ class TestEventParsing:
 
     def test_parse_invalid_commitlog_entry_raises_error(self):
         """Test that invalid commitlog entry raises ParseError"""
-        from src.cdc.parser import parse_commitlog_entry, ParseError
+        from src.cdc.parser import ParseError, parse_commitlog_entry
 
         invalid_entry = b"GARBAGE DATA"
 

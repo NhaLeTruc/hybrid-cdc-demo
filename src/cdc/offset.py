@@ -4,11 +4,12 @@ Manages replication offsets per partition and destination
 """
 
 from datetime import datetime, timezone
-from typing import Optional, Dict
+from typing import Dict, Optional
 from uuid import uuid4
+
 import structlog
 
-from src.models.offset import ReplicationOffset, Destination
+from src.models.offset import Destination, ReplicationOffset
 
 logger = structlog.get_logger(__name__)
 
@@ -54,7 +55,9 @@ class OffsetManager:
 
         # In production, this would query the offset table in the destination database
         # For now, return None (no offset stored)
-        logger.debug("No offset found", table=table_name, partition=partition_id, dest=destination.value)
+        logger.debug(
+            "No offset found", table=table_name, partition=partition_id, dest=destination.value
+        )
         return None
 
     def write_offset(self, offset: ReplicationOffset) -> None:
@@ -142,7 +145,11 @@ class OffsetManager:
             tbl, ks, partition, dest = key
             if tbl == table_name and ks == keyspace:
                 # Keep the latest offset for each destination
-                if dest not in offsets or offset.last_event_timestamp_micros > offsets[dest].last_event_timestamp_micros:
+                if (
+                    dest not in offsets
+                    or offset.last_event_timestamp_micros
+                    > offsets[dest].last_event_timestamp_micros
+                ):
                     offsets[dest] = offset
 
         logger.debug("Read all offsets", table=table_name, count=len(offsets))
@@ -170,7 +177,11 @@ class OffsetManager:
         for key, offset in self._in_memory_offsets.items():
             tbl, ks, partition, dest = key
             if tbl == table_name and ks == keyspace and dest == destination:
-                if latest_offset is None or offset.last_event_timestamp_micros > latest_offset.last_event_timestamp_micros:
+                if (
+                    latest_offset is None
+                    or offset.last_event_timestamp_micros
+                    > latest_offset.last_event_timestamp_micros
+                ):
                     latest_offset = offset
 
         if latest_offset:
@@ -209,7 +220,9 @@ class OffsetManager:
             del self._in_memory_offsets[key]
             deleted_count += 1
 
-        logger.info("Cleaned up old offsets", deleted_count=deleted_count, retention_days=retention_days)
+        logger.info(
+            "Cleaned up old offsets", deleted_count=deleted_count, retention_days=retention_days
+        )
         return deleted_count
 
     def create_offset(
@@ -254,7 +267,6 @@ class OffsetManager:
 
         logger.debug("Created new offset", offset_id=str(offset.offset_id))
         return offset
-
 
     def calculate_replication_lag(self, offset: ReplicationOffset) -> float:
         """

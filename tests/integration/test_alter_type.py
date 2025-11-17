@@ -3,9 +3,10 @@ Integration test for ALTER TYPE schema change handling
 Verifies pipeline handles type changes gracefully
 """
 
-import pytest
-from uuid import uuid4
 from datetime import datetime, timezone
+from uuid import uuid4
+
+import pytest
 
 
 @pytest.mark.integration
@@ -13,9 +14,7 @@ from datetime import datetime, timezone
 class TestAlterType:
     """Test pipeline handling of ALTER TYPE schema changes"""
 
-    async def test_alter_type_compatible_widening(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_alter_type_compatible_widening(self, cassandra_session, postgres_connection):
         """Test compatible type widening (int -> bigint)"""
         # Note: Cassandra doesn't support ALTER TYPE directly
         # This test simulates type changes detected from schema metadata
@@ -50,9 +49,7 @@ class TestAlterType:
 
         pass
 
-    async def test_alter_type_incompatible_narrowing(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_alter_type_incompatible_narrowing(self, cassandra_session, postgres_connection):
         """Test incompatible type narrowing (bigint -> int)"""
         cassandra_session.execute(
             """
@@ -82,9 +79,7 @@ class TestAlterType:
 
         pass
 
-    async def test_alter_type_decimal_to_double(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_alter_type_decimal_to_double(self, cassandra_session, postgres_connection):
         """Test changing decimal to double"""
         cassandra_session.execute(
             """
@@ -149,9 +144,7 @@ class TestAlterType:
 
         pass
 
-    async def test_alter_type_timestamp_formats(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_alter_type_timestamp_formats(self, cassandra_session, postgres_connection):
         """Test timestamp format changes"""
         cassandra_session.execute(
             """
@@ -176,9 +169,7 @@ class TestAlterType:
         # Pipeline should handle timezone conversions
         pass
 
-    async def test_alter_type_complex_to_json(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_alter_type_complex_to_json(self, cassandra_session, postgres_connection):
         """Test converting complex types to JSON"""
         cassandra_session.execute(
             """
@@ -244,9 +235,7 @@ class TestAlterType:
 
         pass
 
-    async def test_alter_type_with_constraints(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_alter_type_with_constraints(self, cassandra_session, postgres_connection):
         """Test type changes with constraints (e.g., NOT NULL)"""
         cassandra_session.execute(
             """
@@ -332,9 +321,7 @@ class TestAlterType:
             )
             assert not change.is_compatible(), f"{old_type} -> {new_type} should be incompatible"
 
-    async def test_alter_type_preserves_data(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_alter_type_preserves_data(self, cassandra_session, postgres_connection):
         """Test that compatible type changes preserve existing data"""
         cassandra_session.execute(
             """

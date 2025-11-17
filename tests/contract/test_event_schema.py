@@ -4,12 +4,12 @@ Validates that ChangeEvent dataclass matches event-schema.json contract
 """
 
 import json
-import pytest
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
-from jsonschema import validate, ValidationError
+import pytest
+from jsonschema import ValidationError, validate
 
 from src.models.event import ChangeEvent, EventType
 
@@ -17,7 +17,13 @@ from src.models.event import ChangeEvent, EventType
 @pytest.fixture
 def event_schema():
     """Load event-schema.json contract"""
-    schema_path = Path(__file__).parent.parent.parent / "specs" / "001-secure-cdc-pipeline" / "contracts" / "event-schema.json"
+    schema_path = (
+        Path(__file__).parent.parent.parent
+        / "specs"
+        / "001-secure-cdc-pipeline"
+        / "contracts"
+        / "event-schema.json"
+    )
     with open(schema_path) as f:
         return json.load(f)
 

@@ -4,13 +4,14 @@ Writes failed events to JSONL files for later analysis and replay
 """
 
 import json
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
+
 import structlog
 
-from src.models.event import ChangeEvent
 from src.models.dead_letter_event import DeadLetterEvent
+from src.models.event import ChangeEvent
 
 logger = structlog.get_logger(__name__)
 

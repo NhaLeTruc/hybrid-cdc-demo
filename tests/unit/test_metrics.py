@@ -3,16 +3,14 @@ Unit tests for Prometheus metrics collection
 Tests metric collection logic and counter/gauge updates
 """
 
-import pytest
-from prometheus_client import REGISTRY
 
 from src.observability.metrics import (
-    increment_events_processed,
     increment_errors,
+    increment_events_processed,
+    observe_replication_duration,
+    set_backlog,
     set_replication_lag,
     set_throughput,
-    set_backlog,
-    observe_replication_duration,
 )
 
 

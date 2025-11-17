@@ -3,14 +3,14 @@ Cassandra CDC Commitlog Reader
 Reads commitlog files from Cassandra cdc_raw directory
 """
 
-import os
 import time
 from pathlib import Path
-from typing import Iterator, Optional, List
+from typing import Iterator, List, Optional
+
 import structlog
 
+from src.cdc.parser import ParseError, parse_commitlog_entry
 from src.models.event import ChangeEvent
-from src.cdc.parser import parse_commitlog_entry, ParseError
 
 logger = structlog.get_logger(__name__)
 
@@ -99,9 +99,7 @@ class CommitLogReader:
 
             # Read events from file
             try:
-                yield from self._read_file_events(
-                    commitlog_file, table_name, keyspace, position
-                )
+                yield from self._read_file_events(commitlog_file, table_name, keyspace, position)
 
                 # Mark file as processed
                 self._processed_files.add(commitlog_file.name)
@@ -169,7 +167,9 @@ class CommitLogReader:
 
                     entry_size = int.from_bytes(size_bytes, byteorder="big")
                     if entry_size == 0 or entry_size > 100_000_000:  # Sanity check
-                        logger.warning("Invalid entry size, skipping", size=entry_size, position=position)
+                        logger.warning(
+                            "Invalid entry size, skipping", size=entry_size, position=position
+                        )
                         break
 
                     # Read entry data

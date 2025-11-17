@@ -4,20 +4,26 @@ Validates that ReplicationOffset dataclass matches offset-schema.json contract
 """
 
 import json
-import pytest
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
-from jsonschema import validate, ValidationError
+import pytest
+from jsonschema import ValidationError, validate
 
-from src.models.offset import ReplicationOffset, Destination
+from src.models.offset import Destination, ReplicationOffset
 
 
 @pytest.fixture
 def offset_schema():
     """Load offset-schema.json contract"""
-    schema_path = Path(__file__).parent.parent.parent / "specs" / "001-secure-cdc-pipeline" / "contracts" / "offset-schema.json"
+    schema_path = (
+        Path(__file__).parent.parent.parent
+        / "specs"
+        / "001-secure-cdc-pipeline"
+        / "contracts"
+        / "offset-schema.json"
+    )
     with open(schema_path) as f:
         return json.load(f)
 

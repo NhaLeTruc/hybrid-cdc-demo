@@ -3,11 +3,10 @@ Integration test for schema incompatibility handling
 Verifies unsupported schema changes route events to DLQ
 """
 
-import pytest
-from uuid import uuid4
 from datetime import datetime, timezone
-from pathlib import Path
-import json
+from uuid import uuid4
+
+import pytest
 
 
 @pytest.mark.integration
@@ -311,9 +310,7 @@ class TestSchemaIncompatibility:
 
         pass
 
-    async def test_incompatibility_logged_with_details(
-        self, cassandra_session, caplog, tmp_path
-    ):
+    async def test_incompatibility_logged_with_details(self, cassandra_session, caplog, tmp_path):
         """Test that incompatibilities are logged with full details"""
         cassandra_session.execute(
             """

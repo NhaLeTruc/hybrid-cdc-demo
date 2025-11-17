@@ -6,7 +6,6 @@ Note: This is a simplified parser for the tech demo.
 Production implementation would use cassandra-driver's commitlog parser.
 """
 
-import struct
 from datetime import datetime, timezone
 from typing import Any, Dict
 from uuid import uuid4

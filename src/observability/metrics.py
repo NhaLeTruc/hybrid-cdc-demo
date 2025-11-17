@@ -5,7 +5,6 @@ Full implementation in Phase 5 (User Story 3)
 
 from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
-
 # Prometheus Metrics (will be fully implemented in User Story 3)
 # Counters
 events_processed_total = Counter(
@@ -31,9 +30,7 @@ events_per_second = Gauge(
     "cdc_events_per_second", "Current throughput (events/sec moving average)", ["destination"]
 )
 
-backlog_depth = Gauge(
-    "cdc_backlog_depth", "Number of uncommitted events buffered", ["destination"]
-)
+backlog_depth = Gauge("cdc_backlog_depth", "Number of uncommitted events buffered", ["destination"])
 
 pipeline_uptime_seconds = Counter("cdc_pipeline_uptime_seconds", "Pipeline uptime in seconds")
 

@@ -81,9 +81,7 @@ class SchemaChange:
 
         return False
 
-    def _is_compatible_type_change(
-        self, old_type: Optional[str], new_type: Optional[str]
-    ) -> bool:
+    def _is_compatible_type_change(self, old_type: Optional[str], new_type: Optional[str]) -> bool:
         """Check if a type change is compatible (safe widening)"""
         if old_type is None or new_type is None:
             return False
@@ -106,7 +104,9 @@ class SchemaChange:
     def to_dict(self) -> Dict[str, any]:
         """Convert to dictionary for serialization"""
         return {
-            "change_type": self.change_type.value if isinstance(self.change_type, Enum) else self.change_type,
+            "change_type": (
+                self.change_type.value if isinstance(self.change_type, Enum) else self.change_type
+            ),
             "column_name": self.column_name,
             "old_type": self.old_type,
             "new_type": self.new_type,

@@ -7,9 +7,10 @@ import hashlib
 import hmac
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Dict, Any, List
-import yaml
+from typing import Any, Dict, List, Optional
+
 import structlog
+import yaml
 
 logger = structlog.get_logger(__name__)
 

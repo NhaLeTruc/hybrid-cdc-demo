@@ -14,7 +14,6 @@ from testcontainers.cassandra import CassandraContainer
 from testcontainers.clickhouse import ClickHouseContainer
 from testcontainers.postgres import PostgresContainer
 
-
 # ============================================================================
 # Event Loop Configuration
 # ============================================================================
@@ -64,7 +63,10 @@ def cassandra_session(
     Yields:
         Cassandra Session instance
     """
-    cluster = Cluster([cassandra_container.get_container_host_ip()], port=cassandra_container.get_exposed_port(9042))
+    cluster = Cluster(
+        [cassandra_container.get_container_host_ip()],
+        port=cassandra_container.get_exposed_port(9042),
+    )
     session = cluster.connect()
 
     # Create test keyspace

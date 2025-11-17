@@ -4,7 +4,7 @@ Represents an event that failed after max retries
 """
 
 from dataclasses import dataclass
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from uuid import UUID
 
 

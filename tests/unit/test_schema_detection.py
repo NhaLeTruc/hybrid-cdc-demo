@@ -3,8 +3,6 @@ Unit tests for schema change detection
 Tests schema comparison and change detection logic
 """
 
-import pytest
-from typing import Dict, Any
 
 
 class TestSchemaDetection:
@@ -12,7 +10,7 @@ class TestSchemaDetection:
 
     def test_detect_add_column(self):
         """Test detection of ADD COLUMN schema change"""
-        from src.models.schema import TableSchema, SchemaChange, SchemaChangeType
+        from src.models.schema import SchemaChangeType, TableSchema
 
         # Old schema: users table with id, email
         old_schema = TableSchema(
@@ -49,7 +47,7 @@ class TestSchemaDetection:
 
     def test_detect_drop_column(self):
         """Test detection of DROP COLUMN schema change"""
-        from src.models.schema import TableSchema, SchemaChangeType
+        from src.models.schema import SchemaChangeType, TableSchema
 
         old_schema = TableSchema(
             keyspace="ecommerce",
@@ -83,7 +81,7 @@ class TestSchemaDetection:
 
     def test_detect_alter_type(self):
         """Test detection of ALTER TYPE schema change"""
-        from src.models.schema import TableSchema, SchemaChangeType
+        from src.models.schema import SchemaChangeType, TableSchema
 
         old_schema = TableSchema(
             keyspace="ecommerce",
@@ -118,7 +116,7 @@ class TestSchemaDetection:
 
     def test_detect_multiple_changes(self):
         """Test detection of multiple schema changes at once"""
-        from src.models.schema import TableSchema, SchemaChangeType
+        from src.models.schema import SchemaChangeType, TableSchema
 
         old_schema = TableSchema(
             keyspace="ecommerce",

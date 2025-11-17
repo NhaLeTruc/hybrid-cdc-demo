@@ -3,9 +3,9 @@ Integration test for DROP COLUMN schema change handling
 Verifies pipeline handles column removal gracefully
 """
 
-import pytest
 from uuid import uuid4
-from datetime import datetime, timezone
+
+import pytest
 
 
 @pytest.mark.integration
@@ -13,9 +13,7 @@ from datetime import datetime, timezone
 class TestDropColumn:
     """Test pipeline handling of DROP COLUMN schema changes"""
 
-    async def test_drop_column_from_table(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_drop_column_from_table(self, cassandra_session, postgres_connection):
         """Test that pipeline handles DROP COLUMN without data loss"""
         # Setup: Create table with 3 columns
         cassandra_session.execute(
@@ -296,9 +294,7 @@ class TestDropColumn:
         # Pipeline should handle schema incompatibilities
         pass
 
-    async def test_drop_column_nullable_behavior(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_drop_column_nullable_behavior(self, cassandra_session, postgres_connection):
         """Test DROP COLUMN handling for nullable vs non-nullable columns"""
         cassandra_session.execute(
             """
@@ -368,9 +364,7 @@ class TestDropColumn:
 
         pass
 
-    async def test_drop_column_updates_metrics(
-        self, cassandra_session, postgres_connection
-    ):
+    async def test_drop_column_updates_metrics(self, cassandra_session, postgres_connection):
         """Test that schema changes update metrics"""
         cassandra_session.execute(
             """

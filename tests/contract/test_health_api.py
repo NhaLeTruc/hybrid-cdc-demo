@@ -3,17 +3,22 @@ Contract tests for /health endpoint
 Validates health endpoint matches metrics-api.yaml specification
 """
 
-import pytest
-import requests
 from pathlib import Path
+
+import pytest
 import yaml
-import json
 
 
 @pytest.fixture
 def metrics_api_spec():
     """Load metrics-api.yaml specification"""
-    spec_path = Path(__file__).parent.parent.parent / "specs" / "001-secure-cdc-pipeline" / "contracts" / "metrics-api.yaml"
+    spec_path = (
+        Path(__file__).parent.parent.parent
+        / "specs"
+        / "001-secure-cdc-pipeline"
+        / "contracts"
+        / "metrics-api.yaml"
+    )
     with open(spec_path) as f:
         return yaml.safe_load(f)
 

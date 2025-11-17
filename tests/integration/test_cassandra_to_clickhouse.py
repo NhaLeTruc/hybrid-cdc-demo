@@ -3,9 +3,8 @@ Integration test for Cassandra → ClickHouse replication
 End-to-end test of CDC pipeline from Cassandra to ClickHouse warehouse
 """
 
-import pytest
-from uuid import uuid4
 from datetime import datetime, timezone
+from uuid import uuid4
 
 
 class TestCassandraToClickHouse:
@@ -52,7 +51,14 @@ class TestCassandraToClickHouse:
                 INSERT INTO users (user_id, email, first_name, last_name, age, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, f"user{i}@example.com", f"User{i}", "Test", 20 + i, datetime.now(timezone.utc)),
+                (
+                    user_id,
+                    f"user{i}@example.com",
+                    f"User{i}",
+                    "Test",
+                    20 + i,
+                    datetime.now(timezone.utc),
+                ),
             )
 
         # Run CDC

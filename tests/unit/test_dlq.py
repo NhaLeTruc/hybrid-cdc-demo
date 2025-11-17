@@ -3,11 +3,9 @@ Unit tests for Dead Letter Queue (DLQ)
 Tests DLQ write logic for failed events
 """
 
-import pytest
-from pathlib import Path
 import json
-from uuid import uuid4
 from datetime import datetime, timezone
+from uuid import uuid4
 
 from src.models.event import ChangeEvent, EventType
 
