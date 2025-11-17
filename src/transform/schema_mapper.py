@@ -1,12 +1,14 @@
 """
 Schema Mapper
 Maps Cassandra types to warehouse-specific types
+Handles schema evolution and incompatibility detection
 """
 
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Set
 import yaml
 import structlog
+from src.models.schema import TableSchema, SchemaChange, ChangeType
 
 logger = structlog.get_logger(__name__)
 
@@ -55,6 +57,10 @@ class SchemaMapper:
             "INT": "integer",
             "BIGINT": "bigint",
             "TIMESTAMP": "timestamptz",
+            "DECIMAL": "numeric",
+            "DOUBLE": "double precision",
+            "FLOAT": "real",
+            "BOOLEAN": "boolean",
         }
         self.clickhouse_mappings = {
             "UUID": "UUID",
@@ -63,8 +69,159 @@ class SchemaMapper:
             "INT": "Int32",
             "BIGINT": "Int64",
             "TIMESTAMP": "DateTime64(3)",
+            "DECIMAL": "Decimal(38, 10)",
+            "DOUBLE": "Float64",
+            "FLOAT": "Float32",
+            "BOOLEAN": "UInt8",
         }
         self.timescaledb_mappings = self.postgres_mappings.copy()
+
+    def apply_schema_change(
+        self,
+        schema: TableSchema,
+        change: SchemaChange,
+        target_warehouse: str,
+    ) -> Dict[str, str]:
+        """
+        Apply schema change to get updated column mappings
+
+        Args:
+            schema: Current table schema
+            change: Schema change to apply
+            target_warehouse: Target warehouse (postgres, clickhouse, timescaledb)
+
+        Returns:
+            Updated column name -> warehouse type mappings
+        """
+        mappings = self._get_target_mappings(target_warehouse)
+        result = {}
+
+        # Start with existing columns
+        for col_name, col_type in schema.columns.items():
+            warehouse_type = mappings.get(col_type.upper(), "text")
+            result[col_name] = warehouse_type
+
+        # Apply the change
+        if change.change_type == ChangeType.ADD_COLUMN:
+            # Add new column mapping
+            if change.new_type:
+                warehouse_type = mappings.get(change.new_type.upper(), "text")
+                result[change.column_name] = warehouse_type
+
+        elif change.change_type == ChangeType.DROP_COLUMN:
+            # Remove column from mappings
+            result.pop(change.column_name, None)
+
+        elif change.change_type == ChangeType.ALTER_TYPE:
+            # Update column type mapping
+            if change.new_type:
+                warehouse_type = mappings.get(change.new_type.upper(), "text")
+                result[change.column_name] = warehouse_type
+
+        return result
+
+    def _get_target_mappings(self, target_warehouse: str) -> Dict[str, str]:
+        """Get type mappings for target warehouse"""
+        if target_warehouse.lower() == "postgres":
+            return self.postgres_mappings
+        elif target_warehouse.lower() == "clickhouse":
+            return self.clickhouse_mappings
+        elif target_warehouse.lower() == "timescaledb":
+            return self.timescaledb_mappings
+        else:
+            return self.postgres_mappings
+
+    def detect_incompatible_types(
+        self, cassandra_type: str, target_warehouse: str
+    ) -> bool:
+        """
+        Detect if a Cassandra type cannot be mapped to target warehouse
+
+        Args:
+            cassandra_type: Cassandra CQL type
+            target_warehouse: Target warehouse name
+
+        Returns:
+            True if incompatible (no mapping exists), False if compatible
+        """
+        mappings = self._get_target_mappings(target_warehouse)
+        type_upper = cassandra_type.upper()
+
+        # Check for complex/unsupported types
+        unsupported_patterns = [
+            "FROZEN<",  # Frozen collections
+            "TUPLE<",  # Tuples
+            "COUNTER",  # Counters
+        ]
+
+        for pattern in unsupported_patterns:
+            if pattern in type_upper:
+                logger.warning(
+                    "Unsupported Cassandra type detected",
+                    cassandra_type=cassandra_type,
+                    target=target_warehouse,
+                )
+                return True
+
+        # Check if mapping exists
+        if type_upper not in mappings:
+            logger.warning(
+                "No type mapping found",
+                cassandra_type=cassandra_type,
+                target=target_warehouse,
+            )
+            return True
+
+        return False
+
+    def get_incompatible_columns(
+        self, schema: TableSchema, target_warehouse: str
+    ) -> List[str]:
+        """
+        Get list of columns with incompatible types
+
+        Args:
+            schema: Table schema to check
+            target_warehouse: Target warehouse name
+
+        Returns:
+            List of column names with incompatible types
+        """
+        incompatible = []
+
+        for col_name, col_type in schema.columns.items():
+            if self.detect_incompatible_types(col_type, target_warehouse):
+                incompatible.append(col_name)
+
+        return incompatible
+
+    def is_schema_change_compatible(
+        self, change: SchemaChange, target_warehouse: str
+    ) -> bool:
+        """
+        Check if a schema change is compatible with target warehouse
+
+        Args:
+            change: Schema change to check
+            target_warehouse: Target warehouse name
+
+        Returns:
+            True if compatible, False if incompatible
+        """
+        # First check if the change itself is compatible
+        if not change.is_compatible():
+            return False
+
+        # For ADD COLUMN, check if new type is supported
+        if change.change_type == ChangeType.ADD_COLUMN and change.new_type:
+            return not self.detect_incompatible_types(change.new_type, target_warehouse)
+
+        # For ALTER TYPE, check if new type is supported
+        if change.change_type == ChangeType.ALTER_TYPE and change.new_type:
+            return not self.detect_incompatible_types(change.new_type, target_warehouse)
+
+        # DROP COLUMN is always compatible
+        return True
 
 
 # Module-level functions for convenience
