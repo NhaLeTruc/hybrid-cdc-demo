@@ -168,3 +168,126 @@ def log_replication_event(
         logger.info(**log_data)
     else:
         logger.error(**log_data)
+
+
+def log_schema_change(
+    logger: structlog.stdlib.BoundLogger,
+    keyspace: str,
+    table_name: str,
+    change_type: str,
+    column_name: str,
+    old_type: str = None,
+    new_type: str = None,
+    version: int = None,
+    is_compatible: bool = True,
+) -> None:
+    """
+    Log schema change detection
+
+    Args:
+        logger: Structlog logger
+        keyspace: Cassandra keyspace
+        table_name: Table name
+        change_type: Type of change (ADD_COLUMN, DROP_COLUMN, ALTER_TYPE)
+        column_name: Name of affected column
+        old_type: Previous column type (for ALTER/DROP)
+        new_type: New column type (for ADD/ALTER)
+        version: New schema version number
+        is_compatible: Whether change is compatible
+    """
+    log_data = {
+        "event": "schema_change_detected",
+        "keyspace": keyspace,
+        "table_name": table_name,
+        "change_type": change_type,
+        "column_name": column_name,
+        "is_compatible": is_compatible,
+    }
+
+    if old_type:
+        log_data["old_type"] = old_type
+    if new_type:
+        log_data["new_type"] = new_type
+    if version:
+        log_data["schema_version"] = version
+
+    if is_compatible:
+        logger.info(**log_data)
+    else:
+        logger.warning(**log_data)
+
+
+def log_schema_incompatibility(
+    logger: structlog.stdlib.BoundLogger,
+    keyspace: str,
+    table_name: str,
+    reason: str,
+    details: Dict[str, Any] = None,
+) -> None:
+    """
+    Log schema incompatibility that requires manual intervention
+
+    Args:
+        logger: Structlog logger
+        keyspace: Cassandra keyspace
+        table_name: Table name
+        reason: Reason for incompatibility
+        details: Additional details about the incompatibility
+    """
+    log_data = {
+        "event": "schema_incompatibility_detected",
+        "keyspace": keyspace,
+        "table_name": table_name,
+        "reason": reason,
+        "action_required": "manual_intervention",
+    }
+
+    if details:
+        log_data.update(details)
+
+    logger.error(**log_data)
+
+
+def log_schema_migration(
+    logger: structlog.stdlib.BoundLogger,
+    keyspace: str,
+    table_name: str,
+    from_version: int,
+    to_version: int,
+    changes_count: int,
+    duration_ms: float,
+    success: bool,
+    error: str = None,
+) -> None:
+    """
+    Log schema migration completion
+
+    Args:
+        logger: Structlog logger
+        keyspace: Cassandra keyspace
+        table_name: Table name
+        from_version: Previous schema version
+        to_version: New schema version
+        changes_count: Number of schema changes applied
+        duration_ms: Migration duration in milliseconds
+        success: Whether migration succeeded
+        error: Error message if failed
+    """
+    log_data = {
+        "event": "schema_migration_completed" if success else "schema_migration_failed",
+        "keyspace": keyspace,
+        "table_name": table_name,
+        "from_version": from_version,
+        "to_version": to_version,
+        "changes_count": changes_count,
+        "duration_ms": duration_ms,
+        "success": success,
+    }
+
+    if error:
+        log_data["error"] = error
+
+    if success:
+        logger.info(**log_data)
+    else:
+        logger.error(**log_data)
