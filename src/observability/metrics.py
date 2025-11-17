@@ -18,6 +18,10 @@ errors_total = Counter(
     "cdc_errors_total", "Total errors by destination and error type", ["destination", "error_type"]
 )
 
+retry_attempts_total = Counter(
+    "cdc_retry_attempts_total", "Total retry attempts by destination", ["destination"]
+)
+
 # Gauges
 replication_lag_seconds = Gauge(
     "cdc_replication_lag_seconds", "Replication lag in seconds behind Cassandra", ["destination"]
@@ -61,6 +65,11 @@ def increment_events_processed(destination: str, table: str, count: int = 1) -> 
 def increment_errors(destination: str, error_type: str, count: int = 1) -> None:
     """Increment error counter"""
     errors_total.labels(destination=destination, error_type=error_type).inc(count)
+
+
+def increment_retries(destination: str, count: int = 1) -> None:
+    """Increment retry attempts counter"""
+    retry_attempts_total.labels(destination=destination).inc(count)
 
 
 def set_replication_lag(destination: str, lag_seconds: float) -> None:
