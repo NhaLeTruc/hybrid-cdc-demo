@@ -154,28 +154,28 @@
 
 ### Tests for User Story 3 (TDD - Write FIRST, ensure FAIL before implementation) ⚠️
 
-- [ ] T077 [P] [US3] Create tests/unit/test_metrics.py for Prometheus metric collection logic
-- [ ] T078 [P] [US3] Create tests/contract/test_metrics_api.py validating /metrics endpoint matches metrics-api.yaml spec
-- [ ] T079 [P] [US3] Create tests/contract/test_health_api.py validating /health endpoint matches metrics-api.yaml spec
-- [ ] T080 [US3] Create tests/integration/test_metrics_collection.py verifying metrics update during replication
-- [ ] T081 [US3] Create tests/integration/test_health_checks.py verifying dependency health detection
+- [x] T077 [P] [US3] Create tests/unit/test_metrics.py for Prometheus metric collection logic
+- [x] T078 [P] [US3] Create tests/contract/test_metrics_api.py validating /metrics endpoint matches metrics-api.yaml spec
+- [x] T079 [P] [US3] Create tests/contract/test_health_api.py validating /health endpoint matches metrics-api.yaml spec
+- [x] T080 [US3] Create tests/integration/test_metrics_collection.py verifying metrics update during replication
+- [x] T081 [US3] Create tests/integration/test_health_checks.py verifying dependency health detection
 
 ### Implementation for User Story 3
 
-- [ ] T082 [US3] Implement Prometheus metrics in src/observability/metrics.py (cdc_events_processed_total counter)
-- [ ] T083 [US3] Add cdc_replication_lag_seconds gauge to src/observability/metrics.py
-- [ ] T084 [US3] Add cdc_events_per_second gauge to src/observability/metrics.py
-- [ ] T085 [US3] Add cdc_errors_total counter to src/observability/metrics.py
-- [ ] T086 [US3] Add cdc_backlog_depth gauge to src/observability/metrics.py
-- [ ] T087 [US3] Create HTTP server for /metrics endpoint in src/observability/metrics.py (prometheus-client HTTP server)
-- [ ] T088 [US3] Create src/observability/health.py with health check endpoint implementation
-- [ ] T089 [US3] Implement dependency health checks in src/observability/health.py (Cassandra, Postgres, ClickHouse, TimescaleDB)
-- [ ] T090 [US3] Create src/models/destination_sink.py with DestinationSink dataclass per data-model.md
-- [ ] T091 [US3] Integrate metrics collection into src/main.py (increment counters, update gauges during replication)
-- [ ] T092 [US3] Integrate health checks into src/main.py (periodic health check loop, update DestinationSink status)
-- [ ] T093 [US3] Add lag calculation logic in src/cdc/offset.py (compare Cassandra timestamp to current time)
-- [ ] T094 [US3] Add throughput tracking in src/sinks/base.py (moving average of events per second)
-- [ ] T095 [US3] Run all User Story 3 tests and verify they pass
+- [x] T082 [US3] Implement Prometheus metrics in src/observability/metrics.py (cdc_events_processed_total counter)
+- [x] T083 [US3] Add cdc_replication_lag_seconds gauge to src/observability/metrics.py
+- [x] T084 [US3] Add cdc_events_per_second gauge to src/observability/metrics.py
+- [x] T085 [US3] Add cdc_errors_total counter to src/observability/metrics.py
+- [x] T086 [US3] Add cdc_backlog_depth gauge to src/observability/metrics.py
+- [x] T087 [US3] Create HTTP server for /metrics endpoint in src/observability/metrics.py (prometheus-client HTTP server)
+- [x] T088 [US3] Create src/observability/health.py with health check endpoint implementation
+- [x] T089 [US3] Implement dependency health checks in src/observability/health.py (Cassandra, Postgres, ClickHouse, TimescaleDB)
+- [x] T090 [US3] Create src/models/destination_sink.py with DestinationSink dataclass per data-model.md
+- [x] T091 [US3] Integrate metrics collection into src/main.py (increment counters, update gauges during replication)
+- [x] T092 [US3] Integrate health checks into src/main.py (periodic health check loop, update DestinationSink status)
+- [x] T093 [US3] Add lag calculation logic in src/cdc/offset.py (compare Cassandra timestamp to current time)
+- [x] T094 [US3] Add throughput tracking in src/sinks/base.py (moving average of events per second)
+- [x] T095 [US3] Run all User Story 3 tests and verify they pass
 
 **Checkpoint**: All three user stories independently functional. Metrics and health endpoints expose real-time observability.
 
@@ -189,10 +189,10 @@
 
 ### Tests for User Story 4 (TDD - Write FIRST, ensure FAIL before implementation) ⚠️
 
-- [ ] T096 [P] [US4] Create tests/unit/test_retry_logic.py for exponential backoff calculation and jitter
-- [ ] T097 [P] [US4] Create tests/unit/test_dlq.py for dead letter queue write logic
-- [ ] T098 [US4] Create tests/chaos/test_network_partition.py using Toxiproxy to simulate network failures
-- [ ] T099 [US4] Create tests/chaos/test_slow_destination.py simulating high latency destinations
+- [x] T096 [P] [US4] Create tests/unit/test_retry_logic.py for exponential backoff calculation and jitter
+- [x] T097 [P] [US4] Create tests/unit/test_dlq.py for dead letter queue write logic
+- [x] T098 [US4] Create tests/chaos/test_network_partition.py using Toxiproxy to simulate network failures
+- [x] T099 [US4] Create tests/chaos/test_slow_destination.py simulating high latency destinations
 - [ ] T100 [US4] Create tests/chaos/test_database_restart.py simulating database shutdown and restart
 
 ### Implementation for User Story 4

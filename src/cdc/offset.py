@@ -254,3 +254,25 @@ class OffsetManager:
 
         logger.debug("Created new offset", offset_id=str(offset.offset_id))
         return offset
+
+
+    def calculate_replication_lag(self, offset: ReplicationOffset) -> float:
+        """
+        Calculate replication lag in seconds
+
+        Args:
+            offset: Offset to calculate lag for
+
+        Returns:
+            Lag in seconds (how far behind source)
+        """
+        # Current time in microseconds
+        now_micros = int(datetime.now(timezone.utc).timestamp() * 1_000_000)
+
+        # Lag is difference between now and last event timestamp
+        lag_micros = now_micros - offset.last_event_timestamp_micros
+
+        # Convert to seconds
+        lag_seconds = lag_micros / 1_000_000.0
+
+        return max(0.0, lag_seconds)  # Lag cannot be negative

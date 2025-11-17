@@ -41,6 +41,9 @@ class BaseSink(ABC):
         self.is_connected = False
         self._events_written = 0
         self._errors_count = 0
+        self._last_write_time = 0.0
+        self._throughput_samples = []  # Moving average samples
+        self._max_samples = 10  # Keep last 10 samples for moving average
 
         logger.info("Sink initialized", destination=destination.value)
 
@@ -124,7 +127,23 @@ class BaseSink(ABC):
         Args:
             count: Number of events to add to counter
         """
+        import time
+
         self._events_written += count
+
+        # Track throughput
+        current_time = time.time()
+        if self._last_write_time > 0:
+            duration = current_time - self._last_write_time
+            if duration > 0:
+                throughput = count / duration
+                self._throughput_samples.append(throughput)
+
+                # Keep only last N samples
+                if len(self._throughput_samples) > self._max_samples:
+                    self._throughput_samples.pop(0)
+
+        self._last_write_time = current_time
 
     def increment_errors(self, count: int = 1) -> None:
         """
@@ -134,6 +153,18 @@ class BaseSink(ABC):
             count: Number of errors to add to counter
         """
         self._errors_count += count
+
+    def get_throughput_eps(self) -> float:
+        """
+        Get current throughput as moving average
+
+        Returns:
+            Events per second (moving average)
+        """
+        if not self._throughput_samples:
+            return 0.0
+
+        return sum(self._throughput_samples) / len(self._throughput_samples)
 
     def get_stats(self) -> dict:
         """
@@ -147,6 +178,7 @@ class BaseSink(ABC):
             "is_connected": self.is_connected,
             "events_written": self._events_written,
             "errors_count": self._errors_count,
+            "throughput_eps": self.get_throughput_eps(),
         }
 
     async def __aenter__(self):
