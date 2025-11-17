@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/NhaLeTruc/hybrid-cdc-demo/schemas/change-event.json",
+  "title": "ChangeEvent",
+  "description": "CDC event representing a single data modification from Cassandra",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_type",
+    "table_name",
+    "keyspace",
+    "partition_key",
+    "timestamp_micros",
+    "captured_at"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for deduplication and correlation"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": ["INSERT", "UPDATE", "DELETE"],
+      "description": "Type of change operation"
+    },
+    "table_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-z_][a-z0-9_]*$",
+      "description": "Cassandra table name (lowercase with underscores)"
+    },
+    "keyspace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-z_][a-z0-9_]*$",
+      "description": "Cassandra keyspace name"
+    },
+    "partition_key": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Partition key columns and values",
+      "additionalProperties": true
+    },
+    "clustering_key": {
+      "type": "object",
+      "description": "Clustering key columns and values (empty for single-row partition)",
+      "additionalProperties": true
+    },
+    "columns": {
+      "type": "object",
+      "description": "Changed column values (empty for DELETE events)",
+      "additionalProperties": true
+    },
+    "timestamp_micros": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cassandra writetime in microseconds since epoch"
+    },
+    "ttl_seconds": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Time-to-live for inserted row (null if no TTL)"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when pipeline read this event from commitlog"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "event_type": { "const": "DELETE" } }
+      },
+      "then": {
+        "properties": {
+          "columns": { "maxProperties": 0 }
+        }
+      },
+      "else": {
+        "properties": {
+          "columns": { "minProperties": 1 }
+        }
+      }
+    }
+  ],
+  "examples": [
+    {
+      "event_id": "550e8400-e29b-41d4-a716-446655440000",
+      "event_type": "INSERT",
+      "table_name": "users",
+      "keyspace": "production",
+      "partition_key": {
+        "user_id": "user_12345"
+      },
+      "clustering_key": {},
+      "columns": {
+        "email": "user@example.com",
+        "age": 30,
+        "created_at": "2025-11-17T10:30:00Z"
+      },
+      "timestamp_micros": 1700000000000000,
+      "ttl_seconds": null,
+      "captured_at": "2025-11-17T10:30:05.123Z"
+    },
+    {
+      "event_id": "650e8400-e29b-41d4-a716-446655440001",
+      "event_type": "DELETE",
+      "table_name": "sessions",
+      "keyspace": "production",
+      "partition_key": {
+        "session_id": "sess_abcdef"
+      },
+      "clustering_key": {},
+      "columns": {},
+      "timestamp_micros": 1700000001000000,
+      "ttl_seconds": null,
+      "captured_at": "2025-11-17T10:30:06.456Z"
+    }
+  ]
+}
