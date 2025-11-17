@@ -1,0 +1,188 @@
+openapi: 3.0.3
+info:
+  title: CDC Pipeline Observability API
+  description: Prometheus metrics and health check endpoints for the secure CDC pipeline
+  version: 1.0.0
+  contact:
+    name: CDC Pipeline Team
+    url: https://github.com/NhaLeTruc/hybrid-cdc-demo
+
+servers:
+  - url: http://localhost:9090
+    description: Prometheus metrics endpoint
+  - url: http://localhost:8080
+    description: Health check endpoint
+
+paths:
+  /metrics:
+    get:
+      summary: Prometheus Metrics
+      description: Exposes Prometheus-compatible metrics in text format for scraping
+      operationId: getMetrics
+      tags:
+        - Observability
+      responses:
+        '200':
+          description: Prometheus metrics in text format
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP cdc_events_processed_total Total events processed by destination
+                  # TYPE cdc_events_processed_total counter
+                  cdc_events_processed_total{destination="postgres",table="users"} 15678
+                  cdc_events_processed_total{destination="clickhouse",table="users"} 15650
+                  cdc_events_processed_total{destination="timescaledb",table="users"} 15660
+
+                  # HELP cdc_replication_lag_seconds Replication lag in seconds behind Cassandra
+                  # TYPE cdc_replication_lag_seconds gauge
+                  cdc_replication_lag_seconds{destination="postgres"} 2.5
+                  cdc_replication_lag_seconds{destination="clickhouse"} 4.8
+                  cdc_replication_lag_seconds{destination="timescaledb"} 3.2
+
+                  # HELP cdc_events_per_second Current throughput (events/sec moving average)
+                  # TYPE cdc_events_per_second gauge
+                  cdc_events_per_second{destination="postgres"} 850.5
+                  cdc_events_per_second{destination="clickhouse"} 820.3
+                  cdc_events_per_second{destination="timescaledb"} 840.1
+
+                  # HELP cdc_errors_total Total errors by destination and error type
+                  # TYPE cdc_errors_total counter
+                  cdc_errors_total{destination="postgres",error_type="connection"} 0
+                  cdc_errors_total{destination="clickhouse",error_type="schema"} 3
+                  cdc_errors_total{destination="timescaledb",error_type="timeout"} 1
+
+                  # HELP cdc_backlog_depth Number of uncommitted events buffered
+                  # TYPE cdc_backlog_depth gauge
+                  cdc_backlog_depth{destination="postgres"} 0
+                  cdc_backlog_depth{destination="clickhouse"} 150
+                  cdc_backlog_depth{destination="timescaledb"} 50
+
+                  # HELP cdc_pipeline_uptime_seconds Pipeline uptime in seconds
+                  # TYPE cdc_pipeline_uptime_seconds counter
+                  cdc_pipeline_uptime_seconds 86400
+
+  /health:
+    get:
+      summary: Health Check
+      description: Returns pipeline health status and dependency availability
+      operationId: getHealth
+      tags:
+        - Observability
+      responses:
+        '200':
+          description: Pipeline is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "healthy"
+                timestamp: "2025-11-17T10:30:15.123Z"
+                uptime_seconds: 86400
+                dependencies:
+                  cassandra:
+                    status: "up"
+                    last_check: "2025-11-17T10:30:10.000Z"
+                    latency_ms: 5
+                  postgres:
+                    status: "up"
+                    last_check: "2025-11-17T10:30:10.100Z"
+                    latency_ms: 3
+                  clickhouse:
+                    status: "up"
+                    last_check: "2025-11-17T10:30:10.200Z"
+                    latency_ms: 8
+                  timescaledb:
+                    status: "up"
+                    last_check: "2025-11-17T10:30:10.300Z"
+                    latency_ms: 4
+        '503':
+          description: Pipeline is unhealthy (one or more dependencies down)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "unhealthy"
+                timestamp: "2025-11-17T10:30:15.123Z"
+                uptime_seconds: 86400
+                dependencies:
+                  cassandra:
+                    status: "up"
+                    last_check: "2025-11-17T10:30:10.000Z"
+                    latency_ms: 5
+                  postgres:
+                    status: "up"
+                    last_check: "2025-11-17T10:30:10.100Z"
+                    latency_ms: 3
+                  clickhouse:
+                    status: "down"
+                    last_check: "2025-11-17T10:30:10.200Z"
+                    error: "Connection refused"
+                  timescaledb:
+                    status: "up"
+                    last_check: "2025-11-17T10:30:10.300Z"
+                    latency_ms: 4
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - uptime_seconds
+        - dependencies
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+          description: Overall pipeline health status
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of health check
+        uptime_seconds:
+          type: integer
+          minimum: 0
+          description: Pipeline uptime in seconds since start
+        dependencies:
+          type: object
+          description: Health status of each dependency
+          properties:
+            cassandra:
+              $ref: '#/components/schemas/DependencyHealth'
+            postgres:
+              $ref: '#/components/schemas/DependencyHealth'
+            clickhouse:
+              $ref: '#/components/schemas/DependencyHealth'
+            timescaledb:
+              $ref: '#/components/schemas/DependencyHealth'
+
+    DependencyHealth:
+      type: object
+      required:
+        - status
+        - last_check
+      properties:
+        status:
+          type: string
+          enum: [up, down, unknown]
+          description: Dependency availability status
+        last_check:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of last health check
+        latency_ms:
+          type: number
+          minimum: 0
+          description: Connection latency in milliseconds (if up)
+        error:
+          type: string
+          description: Error message (if down)
+
+tags:
+  - name: Observability
+    description: Monitoring and health check endpoints

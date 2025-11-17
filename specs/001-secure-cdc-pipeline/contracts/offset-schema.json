@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/NhaLeTruc/hybrid-cdc-demo/schemas/replication-offset.json",
+  "title": "ReplicationOffset",
+  "description": "Tracks pipeline progress per partition and destination for exactly-once delivery",
+  "type": "object",
+  "required": [
+    "offset_id",
+    "table_name",
+    "keyspace",
+    "partition_id",
+    "destination",
+    "commitlog_file",
+    "commitlog_position",
+    "last_event_timestamp_micros",
+    "last_committed_at",
+    "events_replicated_count"
+  ],
+  "properties": {
+    "offset_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this offset record"
+    },
+    "table_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Cassandra table being replicated"
+    },
+    "keyspace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Cassandra keyspace"
+    },
+    "partition_id": {
+      "type": "integer",
+      "minimum": -9223372036854775808,
+      "maximum": 9223372036854775807,
+      "description": "Cassandra partition token range identifier (int64)"
+    },
+    "destination": {
+      "type": "string",
+      "enum": ["POSTGRES", "CLICKHOUSE", "TIMESCALEDB"],
+      "description": "Which warehouse this offset applies to"
+    },
+    "commitlog_file": {
+      "type": "string",
+      "pattern": "^CommitLog-[0-9]+-[0-9]+\\.log$",
+      "description": "Cassandra commitlog file path"
+    },
+    "commitlog_position": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Byte offset within commitlog file"
+    },
+    "last_event_timestamp_micros": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Timestamp of last successfully replicated event (microseconds since epoch)"
+    },
+    "last_committed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this offset was committed"
+    },
+    "events_replicated_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total events replicated for this partition (counter)"
+    }
+  },
+  "examples": [
+    {
+      "offset_id": "750e8400-e29b-41d4-a716-446655440002",
+      "table_name": "users",
+      "keyspace": "production",
+      "partition_id": 42,
+      "destination": "POSTGRES",
+      "commitlog_file": "CommitLog-7-1700000000.log",
+      "commitlog_position": 1048576,
+      "last_event_timestamp_micros": 1700000000000000,
+      "last_committed_at": "2025-11-17T10:30:05.789Z",
+      "events_replicated_count": 15678
+    }
+  ]
+}
