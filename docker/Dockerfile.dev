@@ -1,0 +1,36 @@
+# Development Dockerfile with test dependencies and tools
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    libpq-dev \
+    git \
+    curl \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt requirements-dev.txt ./
+
+# Install all dependencies (production + development)
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+# Copy application code
+COPY . .
+
+# Install pre-commit hooks
+RUN git init && pre-commit install || true
+
+# Set Python path
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Expose ports
+EXPOSE 9090 8080
+
+# Default command: run tests
+CMD ["pytest", "tests/", "-v"]

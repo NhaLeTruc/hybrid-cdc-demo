@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # Cassandra 4.1 - Source Database with CDC enabled
+  cassandra:
+    image: cassandra:4.1
+    container_name: cdc-cassandra
+    ports:
+      - "9042:9042"  # CQL native protocol
+    environment:
+      - CASSANDRA_CLUSTER_NAME=CDCCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+      - ./cassandra-init.cql:/docker-entrypoint-initdb.d/init.cql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - cdc-network
+
+  # Postgres 15 - Destination Warehouse & Offset Storage
+  postgres:
+    image: postgres:15-alpine
+    container_name: cdc-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=warehouse
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cdc-network
+
+  # ClickHouse 23 - Destination Warehouse
+  clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    container_name: cdc-clickhouse
+    ports:
+      - "8123:8123"  # HTTP interface
+      - "9000:9000"  # Native protocol
+    environment:
+      - CLICKHOUSE_DB=warehouse
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cdc-network
+
+  # TimescaleDB 2.13 - Destination Warehouse (Postgres extension)
+  timescaledb:
+    image: timescale/timescaledb:2.13-pg15
+    container_name: cdc-timescaledb
+    ports:
+      - "5433:5432"  # Different port to avoid conflict with postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=warehouse
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cdc-network
+
+networks:
+  cdc-network:
+    driver: bridge
+
+volumes:
+  cassandra-data:
+  postgres-data:
+  clickhouse-data:
+  timescaledb-data:

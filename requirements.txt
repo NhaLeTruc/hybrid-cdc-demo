@@ -1,0 +1,27 @@
+# Python 3.11+ CDC Pipeline - Production Dependencies
+
+# Cassandra CDC & Database Drivers
+cassandra-driver>=3.28.0
+psycopg[binary]>=3.1.0          # Postgres (async support)
+clickhouse-driver>=0.2.6        # ClickHouse
+
+# Configuration Management
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+PyYAML>=6.0.1
+python-dotenv>=1.0.0
+
+# Security & Cryptography
+cryptography>=41.0.0
+
+# Observability
+prometheus-client>=0.19.0       # Prometheus metrics
+structlog>=23.2.0               # JSON structured logging
+opentelemetry-api>=1.21.0       # Distributed tracing (optional)
+opentelemetry-sdk>=1.21.0
+
+# Async & Concurrency
+aiohttp>=3.9.0                  # Async HTTP for health checks
+
+# HashiCorp Vault (optional - for production secrets)
+hvac>=2.0.0

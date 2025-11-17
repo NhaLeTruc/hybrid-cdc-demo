@@ -1,0 +1,105 @@
+# Cassandra to Warehouse Type Mappings
+# Defines how Cassandra CQL types map to Postgres, ClickHouse, and TimescaleDB types
+
+# Global type mappings (applied to all tables unless overridden)
+global_mappings:
+  cassandra_to_postgres:
+    UUID: "uuid"
+    TEXT: "text"
+    VARCHAR: "varchar"
+    INT: "integer"
+    BIGINT: "bigint"
+    FLOAT: "real"
+    DOUBLE: "double precision"
+    DECIMAL: "numeric"
+    BOOLEAN: "boolean"
+    TIMESTAMP: "timestamptz"
+    DATE: "date"
+    TIME: "time"
+    BLOB: "bytea"
+    # Complex types serialized to JSON
+    MAP: "jsonb"
+    LIST: "jsonb"
+    SET: "jsonb"
+    TUPLE: "jsonb"
+    UDT: "jsonb"
+
+  cassandra_to_clickhouse:
+    UUID: "UUID"
+    TEXT: "String"
+    VARCHAR: "String"
+    INT: "Int32"
+    BIGINT: "Int64"
+    FLOAT: "Float32"
+    DOUBLE: "Float64"
+    DECIMAL: "Decimal(18, 2)"
+    BOOLEAN: "UInt8"
+    TIMESTAMP: "DateTime64(3)"
+    DATE: "Date"
+    TIME: "String"  # ClickHouse has no native TIME type
+    BLOB: "String"
+    # Complex types serialized to JSON
+    MAP: "String"
+    LIST: "String"
+    SET: "String"
+    TUPLE: "String"
+    UDT: "String"
+
+  cassandra_to_timescaledb:
+    # TimescaleDB is Postgres extension, inherits from cassandra_to_postgres
+    # Additional TimescaleDB-specific mappings can be added here
+    TIMESTAMP: "timestamptz"  # TimescaleDB hypertable partitioning key
+
+# Table-specific overrides
+table_mappings:
+  users:
+    cassandra_to_postgres:
+      user_id: "UUID → uuid"
+      email: "TEXT → varchar(255)"  # Override default for length limit
+      phone: "TEXT → varchar(20)"
+      first_name: "TEXT → varchar(100)"
+      last_name: "TEXT → varchar(100)"
+      age: "INT → integer"
+      city: "TEXT → varchar(100)"
+      created_at: "TIMESTAMP → timestamptz"
+
+    cassandra_to_clickhouse:
+      user_id: "UUID → UUID"
+      email: "TEXT → String"
+      phone: "TEXT → String"
+      first_name: "TEXT → String"
+      last_name: "TEXT → String"
+      age: "INT → Int32"
+      city: "TEXT → String"
+      created_at: "TIMESTAMP → DateTime64(3)"
+
+    cassandra_to_timescaledb:
+      # Inherits from cassandra_to_postgres
+      created_at: "TIMESTAMP → timestamptz"  # Hypertable partition key
+
+  orders:
+    cassandra_to_postgres:
+      order_id: "UUID → uuid"
+      user_id: "UUID → uuid"
+      product_id: "UUID → uuid"
+      quantity: "INT → integer"
+      total_price: "DECIMAL → numeric(10, 2)"
+      order_date: "TIMESTAMP → timestamptz"
+
+    cassandra_to_clickhouse:
+      order_id: "UUID → UUID"
+      user_id: "UUID → UUID"
+      product_id: "UUID → UUID"
+      quantity: "INT → Int32"
+      total_price: "DECIMAL → Decimal(10, 2)"
+      order_date: "TIMESTAMP → DateTime64(3)"
+
+    cassandra_to_timescaledb:
+      order_date: "TIMESTAMP → timestamptz"  # Hypertable partition key
+
+# Unsupported type handling
+unsupported_types:
+  # How to handle types that cannot be mapped
+  strategy: "dlq"  # Route to dead letter queue with error
+  # Alternative: "skip" - skip the field, "json" - serialize to JSON
+  log_unsupported: true

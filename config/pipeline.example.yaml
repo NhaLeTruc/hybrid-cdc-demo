@@ -1,0 +1,91 @@
+# CDC Pipeline Configuration Example
+# Copy this file to pipeline.yaml and customize for your environment
+# Credentials should be provided via environment variables (see .env.example)
+
+cassandra:
+  hosts:
+    - "localhost"
+  port: 9042
+  keyspace: "production"
+  cdc_raw_directory: "/var/lib/cassandra/cdc_raw"
+  ssl_enabled: true
+  # username and password loaded from CDC_CASSANDRA_USERNAME and CDC_CASSANDRA_PASSWORD env vars
+
+destinations:
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "warehouse"
+    ssl_mode: "require"
+    connection_pool_size: 10
+    # username and password loaded from CDC_POSTGRES_USERNAME and CDC_POSTGRES_PASSWORD env vars
+
+  clickhouse:
+    host: "localhost"
+    port: 9000
+    database: "warehouse"
+    use_tls: true
+    connection_pool_size: 10
+    # username and password loaded from CDC_CLICKHOUSE_USERNAME and CDC_CLICKHOUSE_PASSWORD env vars
+
+  timescaledb:
+    host: "localhost"
+    port: 5433
+    database: "warehouse"
+    ssl_mode: "require"
+    connection_pool_size: 10
+    # username and password loaded from CDC_TIMESCALEDB_USERNAME and CDC_TIMESCALEDB_PASSWORD env vars
+
+pipeline:
+  # Number of events per micro-batch (balance throughput vs latency)
+  batch_size: 100
+
+  # Concurrent workers per Cassandra partition
+  max_parallelism: 4
+
+  # Maximum uncommitted batches (backpressure control)
+  max_in_flight_batches: 10
+
+  # Commitlog polling interval in milliseconds
+  poll_interval_ms: 100
+
+retry:
+  # Maximum retry attempts before routing to DLQ
+  max_attempts: 5
+
+  # Initial retry delay in milliseconds
+  base_delay_ms: 100
+
+  # Maximum retry delay (cap for exponential backoff)
+  max_delay_ms: 30000
+
+  # Exponential backoff multiplier
+  backoff_multiplier: 2.0
+
+  # Add random jitter (0-25%) to avoid thundering herd
+  jitter: true
+
+observability:
+  # Prometheus metrics HTTP endpoint port
+  metrics_port: 9090
+
+  # Prometheus metrics URL path
+  metrics_path: "/metrics"
+
+  # Health check HTTP endpoint port
+  health_check_port: 8080
+
+  # Health check URL path
+  health_check_path: "/health"
+
+  # Logging severity level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  log_level: "INFO"
+
+  # Log output format (json for production, console for development)
+  log_format: "json"
+
+  # Enable OpenTelemetry distributed tracing (optional)
+  enable_tracing: false
+
+  # OpenTelemetry collector endpoint (e.g., http://jaeger:4318)
+  # tracing_endpoint: "http://localhost:4318"

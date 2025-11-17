@@ -24,15 +24,15 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project directory structure (src/, tests/, docker/, config/, scripts/, data/)
-- [ ] T002 Initialize Python project with pyproject.toml (Python 3.11+, project metadata, tool configs)
-- [ ] T003 [P] Create requirements.txt with production dependencies
-- [ ] T004 [P] Create requirements-dev.txt with development dependencies
-- [ ] T005 [P] Configure pytest in pytest.ini (asyncio mode, coverage settings)
-- [ ] T006 [P] Configure pre-commit hooks in .pre-commit-config.yaml (black, mypy, ruff)
-- [ ] T007 [P] Create .env.example template file for environment variables
-- [ ] T008 [P] Create .gitignore for Python project (venv, __pycache__, .env, data/)
-- [ ] T009 [P] Create README.md with project overview (link to quickstart.md)
+- [x] T001 Create project directory structure (src/, tests/, docker/, config/, scripts/, data/)
+- [x] T002 Initialize Python project with pyproject.toml (Python 3.11+, project metadata, tool configs)
+- [x] T003 [P] Create requirements.txt with production dependencies
+- [x] T004 [P] Create requirements-dev.txt with development dependencies
+- [x] T005 [P] Configure pytest in pytest.ini (asyncio mode, coverage settings)
+- [x] T006 [P] Configure pre-commit hooks in .pre-commit-config.yaml (black, mypy, ruff)
+- [x] T007 [P] Create .env.example template file for environment variables
+- [x] T008 [P] Create .gitignore for Python project (venv, __pycache__, .env, data/)
+- [x] T009 [P] Create README.md with project overview (link to quickstart.md)
 
 ---
 
@@ -42,29 +42,29 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T010 Create docker/docker-compose.yml with Cassandra 4.1 service (port 9042, CDC enabled)
-- [ ] T011 Add Postgres 15 service to docker-compose.yml (port 5432)
-- [ ] T012 Add ClickHouse 23 service to docker-compose.yml (ports 8123, 9000)
-- [ ] T013 Add TimescaleDB 2.13 service to docker-compose.yml (port 5433)
-- [ ] T014 [P] Create docker/Dockerfile for production pipeline image (multi-stage build)
-- [ ] T015 [P] Create docker/Dockerfile.dev with test dependencies
-- [ ] T016 Create config/pipeline.example.yaml based on contracts/config-schema.yaml
-- [ ] T017 [P] Create config/masking-rules.yaml with PII/PHI field definitions
-- [ ] T018 [P] Create config/schema-mappings.yaml for Cassandra → warehouse type mappings
-- [ ] T019 Create src/config/__init__.py (empty)
-- [ ] T020 Create src/config/settings.py with Pydantic Settings models per config-schema.yaml
-- [ ] T021 Create src/config/loader.py to load YAML configuration files
-- [ ] T022 Create src/models/__init__.py (empty)
-- [ ] T023 [P] Create src/models/event.py with ChangeEvent dataclass per data-model.md
-- [ ] T024 [P] Create src/models/offset.py with ReplicationOffset dataclass per data-model.md
-- [ ] T025 [P] Create src/models/schema.py with SchemaVersion dataclass per data-model.md
-- [ ] T026 Create src/observability/__init__.py (empty)
-- [ ] T027 Create src/observability/logging.py with structlog JSON configuration
-- [ ] T028 Create src/observability/metrics.py with Prometheus metrics setup per metrics-api.yaml
-- [ ] T029 Create src/observability/tracing.py with OpenTelemetry configuration (optional)
-- [ ] T030 Create tests/conftest.py with pytest fixtures for testcontainers (Cassandra, Postgres, ClickHouse, TimescaleDB)
-- [ ] T031 Create scripts/wait-for-databases.sh to check database health
-- [ ] T032 Create scripts/setup-local-env.sh to initialize schemas and seed test data
+- [x] T010 Create docker/docker-compose.yml with Cassandra 4.1 service (port 9042, CDC enabled)
+- [x] T011 Add Postgres 15 service to docker-compose.yml (port 5432)
+- [x] T012 Add ClickHouse 23 service to docker-compose.yml (ports 8123, 9000)
+- [x] T013 Add TimescaleDB 2.13 service to docker-compose.yml (port 5433)
+- [x] T014 [P] Create docker/Dockerfile for production pipeline image (multi-stage build)
+- [x] T015 [P] Create docker/Dockerfile.dev with test dependencies
+- [x] T016 Create config/pipeline.example.yaml based on contracts/config-schema.yaml
+- [x] T017 [P] Create config/masking-rules.yaml with PII/PHI field definitions
+- [x] T018 [P] Create config/schema-mappings.yaml for Cassandra → warehouse type mappings
+- [x] T019 Create src/config/__init__.py (empty)
+- [x] T020 Create src/config/settings.py with Pydantic Settings models per config-schema.yaml
+- [x] T021 Create src/config/loader.py to load YAML configuration files
+- [x] T022 Create src/models/__init__.py (empty)
+- [x] T023 [P] Create src/models/event.py with ChangeEvent dataclass per data-model.md
+- [x] T024 [P] Create src/models/offset.py with ReplicationOffset dataclass per data-model.md
+- [x] T025 [P] Create src/models/schema.py with SchemaVersion dataclass per data-model.md
+- [x] T026 Create src/observability/__init__.py (empty)
+- [x] T027 Create src/observability/logging.py with structlog JSON configuration
+- [x] T028 Create src/observability/metrics.py with Prometheus metrics setup per metrics-api.yaml
+- [x] T029 Create src/observability/tracing.py with OpenTelemetry configuration (optional)
+- [x] T030 Create tests/conftest.py with pytest fixtures for testcontainers (Cassandra, Postgres, ClickHouse, TimescaleDB)
+- [x] T031 Create scripts/wait-for-databases.sh to check database health
+- [x] T032 Create scripts/setup-local-env.sh to initialize schemas and seed test data
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

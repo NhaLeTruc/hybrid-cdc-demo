@@ -1,0 +1,28 @@
+# Development & Testing Dependencies
+
+# Include production dependencies
+-r requirements.txt
+
+# Testing Framework
+pytest>=7.4.0
+pytest-asyncio>=0.21.0          # Async test support
+pytest-cov>=4.1.0               # Coverage reporting
+pytest-mock>=3.12.0             # Mocking utilities
+testcontainers>=3.7.0           # Docker-based integration tests
+
+# Chaos Engineering
+toxiproxy-python>=0.6.0         # Network failure simulation
+
+# Performance Testing
+locust>=2.17.0                  # Load testing (optional)
+
+# Code Quality & Linting
+black>=23.11.0                  # Code formatter
+mypy>=1.7.0                     # Static type checking
+ruff>=0.1.6                     # Fast Python linter
+isort>=5.12.0                   # Import sorting
+pre-commit>=3.5.0               # Git hooks
+
+# Development Tools
+ipython>=8.17.0                 # Interactive Python shell
+ipdb>=0.13.13                   # Debugger
