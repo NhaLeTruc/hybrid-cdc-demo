@@ -106,31 +106,31 @@ class ReplicationOffset:
             commitlog_file=commitlog_file,
             commitlog_position=commitlog_position,
             last_event_timestamp_micros=last_event_timestamp_micros,
-            last_committed_at=datetime.now(),
+            last_committed_at=datetime.now(timezone.utc),
             events_replicated_count=events_replicated_count,
         )
 
     def update(
         self,
-        commitlog_file: str,
-        commitlog_position: int,
-        last_event_timestamp_micros: int,
+        new_commitlog_position: int,
+        new_event_timestamp_micros: int,
         events_count: int = 1,
+        new_commitlog_file: str | None = None,
     ) -> "ReplicationOffset":
         """
         Create updated offset with new position and timestamp
 
         Args:
-            commitlog_file: New commitlog file
-            commitlog_position: New position in file
-            last_event_timestamp_micros: New event timestamp
+            new_commitlog_position: New position in file
+            new_event_timestamp_micros: New event timestamp
             events_count: Number of events in this batch (default 1)
+            new_commitlog_file: New commitlog file (defaults to current file)
 
         Returns:
             New ReplicationOffset with updated values
         """
         # Validate monotonicity
-        if last_event_timestamp_micros < self.last_event_timestamp_micros:
+        if new_event_timestamp_micros < self.last_event_timestamp_micros:
             raise ValueError("Timestamps must be monotonically increasing")
 
         return ReplicationOffset(
@@ -139,10 +139,10 @@ class ReplicationOffset:
             keyspace=self.keyspace,
             partition_id=self.partition_id,
             destination=self.destination,
-            commitlog_file=commitlog_file,
-            commitlog_position=commitlog_position,
-            last_event_timestamp_micros=last_event_timestamp_micros,
-            last_committed_at=datetime.now(),
+            commitlog_file=new_commitlog_file or self.commitlog_file,
+            commitlog_position=new_commitlog_position,
+            last_event_timestamp_micros=new_event_timestamp_micros,
+            last_committed_at=datetime.now(timezone.utc),
             events_replicated_count=self.events_replicated_count + events_count,
         )
 

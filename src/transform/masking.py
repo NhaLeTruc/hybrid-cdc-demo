@@ -62,6 +62,7 @@ class MaskingRules:
             # Use defaults
             self.pii_fields = ["email", "phone", "ssn", "credit_card"]
             self.phi_fields = ["medical_record_number", "patient_id"]
+            self._loaded = True  # Mark as loaded with defaults
 
     def classify_field(self, field_name: str) -> MaskingStrategy:
         """

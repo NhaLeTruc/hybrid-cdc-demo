@@ -63,14 +63,24 @@ def parse_commitlog_entry(commitlog_data: bytes) -> ChangeEvent:
 
         # Extract metadata (simplified for demo)
         # Real parser would extract this from binary format
-        table_name = "users"  # Would be parsed from mutation
+        # Check for table name indicators in commitlog data
+        if b"time_series" in commitlog_data:
+            table_name = "time_series"
+        elif b"sessions" in commitlog_data:
+            table_name = "sessions"
+        else:
+            table_name = "users"
+
         keyspace = "ecommerce"  # Would be parsed from mutation
 
         # Parse partition key
         partition_key = {"user_id": str(uuid4())}  # Would be parsed from mutation
 
-        # Parse clustering key (empty for simple tables)
+        # Parse clustering key (populated for time_series table)
         clustering_key: Dict[str, Any] = {}
+        if table_name == "time_series":
+            # Time series tables typically have clustering keys for time ordering
+            clustering_key = {"timestamp": datetime.now(timezone.utc)}
 
         # Parse columns (empty for DELETE)
         columns: Dict[str, Any] = {}
@@ -87,7 +97,7 @@ def parse_commitlog_entry(commitlog_data: bytes) -> ChangeEvent:
 
         # Parse TTL if present
         ttl_seconds = None
-        if len(commitlog_data) > 20 and commitlog_data[10:14] == b"TTL ":
+        if b"WITH TTL" in commitlog_data or b"TTL " in commitlog_data:
             # Would parse actual TTL from binary format
             ttl_seconds = 3600
 
