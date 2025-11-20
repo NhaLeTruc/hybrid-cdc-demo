@@ -33,7 +33,7 @@ TIMESCALEDB_HOST=${TIMESCALEDB_HOST:-localhost}
 TIMESCALEDB_PORT=${TIMESCALEDB_PORT:-5433}
 TIMESCALEDB_USER=${TIMESCALEDB_USER:-postgres}
 TIMESCALEDB_PASSWORD=${TIMESCALEDB_PASSWORD:-postgres}
-TIMESCALEDB_DB=${TIMESCALEDB_DB:-timeseries}
+TIMESCALEDB_DB=${TIMESCALEDB_DB:-warehouse}
 
 # ============================================================================
 # Cassandra Health Check
@@ -65,14 +65,23 @@ wait_for_postgres() {
     local elapsed=0
 
     while [ $elapsed -lt $TIMEOUT ]; do
-        if PGPASSWORD="${POSTGRES_PASSWORD}" psql \
-            -h "${POSTGRES_HOST}" \
-            -p "${POSTGRES_PORT}" \
-            -U "${POSTGRES_USER}" \
-            -d "${POSTGRES_DB}" \
-            -c "SELECT 1;" >/dev/null 2>&1; then
-            echo -e "${GREEN}✓ Postgres is ready${NC}"
-            return 0
+        # Try psql first if available
+        if command -v psql >/dev/null 2>&1; then
+            if PGPASSWORD="${POSTGRES_PASSWORD}" psql \
+                -h "${POSTGRES_HOST}" \
+                -p "${POSTGRES_PORT}" \
+                -U "${POSTGRES_USER}" \
+                -d "${POSTGRES_DB}" \
+                -c "SELECT 1;" >/dev/null 2>&1; then
+                echo -e "${GREEN}✓ Postgres is ready${NC}"
+                return 0
+            fi
+        else
+            # Fallback to TCP check if psql is not available
+            if timeout 5 bash -c "echo > /dev/tcp/${POSTGRES_HOST}/${POSTGRES_PORT}" 2>/dev/null; then
+                echo -e "${GREEN}✓ Postgres is ready (TCP check only - install psql for full verification)${NC}"
+                return 0
+            fi
         fi
 
         sleep $INTERVAL
@@ -114,14 +123,23 @@ wait_for_timescaledb() {
     local elapsed=0
 
     while [ $elapsed -lt $TIMEOUT ]; do
-        if PGPASSWORD="${TIMESCALEDB_PASSWORD}" psql \
-            -h "${TIMESCALEDB_HOST}" \
-            -p "${TIMESCALEDB_PORT}" \
-            -U "${TIMESCALEDB_USER}" \
-            -d "${TIMESCALEDB_DB}" \
-            -c "SELECT 1;" >/dev/null 2>&1; then
-            echo -e "${GREEN}✓ TimescaleDB is ready${NC}"
-            return 0
+        # Try psql first if available
+        if command -v psql >/dev/null 2>&1; then
+            if PGPASSWORD="${TIMESCALEDB_PASSWORD}" psql \
+                -h "${TIMESCALEDB_HOST}" \
+                -p "${TIMESCALEDB_PORT}" \
+                -U "${TIMESCALEDB_USER}" \
+                -d "${TIMESCALEDB_DB}" \
+                -c "SELECT 1;" >/dev/null 2>&1; then
+                echo -e "${GREEN}✓ TimescaleDB is ready${NC}"
+                return 0
+            fi
+        else
+            # Fallback to TCP check if psql is not available
+            if timeout 5 bash -c "echo > /dev/tcp/${TIMESCALEDB_HOST}/${TIMESCALEDB_PORT}" 2>/dev/null; then
+                echo -e "${GREEN}✓ TimescaleDB is ready (TCP check only - install psql for full verification)${NC}"
+                return 0
+            fi
         fi
 
         sleep $INTERVAL

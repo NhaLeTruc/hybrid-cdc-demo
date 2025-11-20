@@ -21,10 +21,10 @@ git clone https://github.com/NhaLeTruc/hybrid-cdc-demo.git
 cd hybrid-cdc-demo
 
 # Start databases (Cassandra, Postgres, ClickHouse, TimescaleDB)
-docker-compose up -d
+docker compose -f docker/docker-compose.yml up -d
 
 # Install dependencies
-python3.11 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
@@ -36,7 +36,7 @@ cp config/pipeline.example.yaml config/pipeline.yaml
 cp .env.example .env
 
 # Run CDC pipeline
-python -m src.main
+python3 -m src.main
 ```
 
 **Full quickstart guide**: See [specs/001-secure-cdc-pipeline/quickstart.md](specs/001-secure-cdc-pipeline/quickstart.md) for detailed 10-minute setup.

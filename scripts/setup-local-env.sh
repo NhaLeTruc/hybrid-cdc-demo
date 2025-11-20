@@ -48,36 +48,13 @@ fi
 echo -e "\n${YELLOW}Step 2: Setting up Cassandra schema...${NC}"
 
 # Create keyspace with CDC enabled
-docker exec -i hybrid-cdc-demo-cassandra-1 cqlsh -e "
-CREATE KEYSPACE IF NOT EXISTS ecommerce
-WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
-" || echo -e "${YELLOW}  Keyspace may already exist${NC}"
+docker exec -i cdc-cassandra cqlsh -e "CREATE KEYSPACE IF NOT EXISTS ecommerce WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};" || echo -e "${YELLOW}  Keyspace may already exist${NC}"
 
 # Create users table with CDC
-docker exec -i hybrid-cdc-demo-cassandra-1 cqlsh -e "
-CREATE TABLE IF NOT EXISTS ecommerce.users (
-    user_id UUID PRIMARY KEY,
-    email TEXT,
-    phone TEXT,
-    first_name TEXT,
-    last_name TEXT,
-    age INT,
-    city TEXT,
-    created_at TIMESTAMP
-) WITH cdc = {'enabled': true};
-" || echo -e "${YELLOW}  Users table may already exist${NC}"
+docker exec -i cdc-cassandra cqlsh -e "CREATE TABLE IF NOT EXISTS ecommerce.users (user_id UUID PRIMARY KEY, email TEXT, phone TEXT, first_name TEXT, last_name TEXT, age INT, city TEXT, created_at TIMESTAMP) WITH cdc = true;" || echo -e "${YELLOW}  Users table may already exist${NC}"
 
 # Create orders table with CDC
-docker exec -i hybrid-cdc-demo-cassandra-1 cqlsh -e "
-CREATE TABLE IF NOT EXISTS ecommerce.orders (
-    order_id UUID PRIMARY KEY,
-    user_id UUID,
-    product_id UUID,
-    quantity INT,
-    total_price DECIMAL,
-    order_date TIMESTAMP
-) WITH cdc = {'enabled': true};
-" || echo -e "${YELLOW}  Orders table may already exist${NC}"
+docker exec -i cdc-cassandra cqlsh -e "CREATE TABLE IF NOT EXISTS ecommerce.orders (order_id UUID PRIMARY KEY, user_id UUID, product_id UUID, quantity INT, total_price DECIMAL, order_date TIMESTAMP) WITH cdc = true;" || echo -e "${YELLOW}  Orders table may already exist${NC}"
 
 echo -e "${GREEN}✓ Cassandra schema created${NC}"
 
@@ -86,16 +63,11 @@ echo -e "${GREEN}✓ Cassandra schema created${NC}"
 # ============================================================================
 echo -e "\n${YELLOW}Step 3: Seeding Cassandra test data...${NC}"
 
-docker exec -i hybrid-cdc-demo-cassandra-1 cqlsh -e "
-INSERT INTO ecommerce.users (user_id, email, phone, first_name, last_name, age, city, created_at)
-VALUES (uuid(), 'alice@example.com', '555-0100', 'Alice', 'Anderson', 28, 'New York', toTimestamp(now()));
+docker exec -i cdc-cassandra cqlsh -e "INSERT INTO ecommerce.users (user_id, email, phone, first_name, last_name, age, city, created_at) VALUES (uuid(), 'alice@example.com', '555-0100', 'Alice', 'Anderson', 28, 'New York', toTimestamp(now()));"
 
-INSERT INTO ecommerce.users (user_id, email, phone, first_name, last_name, age, city, created_at)
-VALUES (uuid(), 'bob@example.com', '555-0200', 'Bob', 'Brown', 35, 'San Francisco', toTimestamp(now()));
+docker exec -i cdc-cassandra cqlsh -e "INSERT INTO ecommerce.users (user_id, email, phone, first_name, last_name, age, city, created_at) VALUES (uuid(), 'bob@example.com', '555-0200', 'Bob', 'Brown', 35, 'San Francisco', toTimestamp(now()));"
 
-INSERT INTO ecommerce.users (user_id, email, phone, first_name, last_name, age, city, created_at)
-VALUES (uuid(), 'carol@example.com', '555-0300', 'Carol', 'Chen', 42, 'Seattle', toTimestamp(now()));
-"
+docker exec -i cdc-cassandra cqlsh -e "INSERT INTO ecommerce.users (user_id, email, phone, first_name, last_name, age, city, created_at) VALUES (uuid(), 'carol@example.com', '555-0300', 'Carol', 'Chen', 42, 'Seattle', toTimestamp(now()));"
 
 echo -e "${GREEN}✓ Cassandra test data seeded (3 users)${NC}"
 
@@ -104,12 +76,7 @@ echo -e "${GREEN}✓ Cassandra test data seeded (3 users)${NC}"
 # ============================================================================
 echo -e "\n${YELLOW}Step 4: Setting up Postgres schema...${NC}"
 
-PGPASSWORD="${POSTGRES_PASSWORD}" psql \
-    -h "${POSTGRES_HOST}" \
-    -p "${POSTGRES_PORT}" \
-    -U "${POSTGRES_USER}" \
-    -d "${POSTGRES_DB}" \
-    <<EOF
+docker exec -i cdc-postgres psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" <<EOF
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY,
@@ -225,12 +192,7 @@ echo -e "${GREEN}✓ ClickHouse schema created${NC}"
 # ============================================================================
 echo -e "\n${YELLOW}Step 6: Setting up TimescaleDB schema...${NC}"
 
-PGPASSWORD="${TIMESCALEDB_PASSWORD}" psql \
-    -h "${TIMESCALEDB_HOST}" \
-    -p "${TIMESCALEDB_PORT}" \
-    -U "${TIMESCALEDB_USER}" \
-    -d "${TIMESCALEDB_DB}" \
-    <<EOF
+docker exec -i cdc-timescaledb psql -U "${TIMESCALEDB_USER}" -d "${TIMESCALEDB_DB}" <<EOF
 -- Enable TimescaleDB extension
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
