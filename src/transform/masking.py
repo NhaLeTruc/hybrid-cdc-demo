@@ -65,7 +65,7 @@ class MaskingRules:
 
     def classify_field(self, field_name: str) -> MaskingStrategy:
         """
-        Classify field and return appropriate masking strategy
+        Classify field and return appropriate masking strategy using pattern matching
 
         Args:
             field_name: Field name to classify
@@ -76,12 +76,19 @@ class MaskingRules:
         if not self._loaded:
             self.load_rules()
 
-        if field_name in self.pii_fields:
-            return MaskingStrategy.PII_HASH
-        elif field_name in self.phi_fields:
-            return MaskingStrategy.PHI_TOKEN
-        else:
-            return MaskingStrategy.NONE
+        field_lower = field_name.lower()
+
+        # Check PHI patterns first (more sensitive)
+        for phi_pattern in self.phi_fields:
+            if phi_pattern.lower() in field_lower:
+                return MaskingStrategy.PHI_TOKEN
+
+        # Check PII patterns
+        for pii_pattern in self.pii_fields:
+            if pii_pattern.lower() in field_lower:
+                return MaskingStrategy.PII_HASH
+
+        return MaskingStrategy.NONE
 
 
 # Global masking rules instance
