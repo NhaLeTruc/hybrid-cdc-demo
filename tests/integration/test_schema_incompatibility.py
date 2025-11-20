@@ -173,14 +173,13 @@ class TestSchemaIncompatibility:
             """
         )
 
-        # Insert tuple
+        # Insert tuple using raw CQL string with explicit tuple notation
         id1 = uuid4()
         cassandra_session.execute(
-            """
+            f"""
             INSERT INTO ecommerce.tuple_test (id, coordinates)
-            VALUES (%s, %s)
-            """,
-            (id1, (37.7749, -122.4194)),
+            VALUES ({id1}, (37.7749, -122.4194))
+            """
         )
 
         # If tuple mapping not implemented, route to DLQ

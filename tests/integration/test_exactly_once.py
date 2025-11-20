@@ -14,7 +14,11 @@ class TestExactlyOnceDelivery:
     """Test exactly-once delivery semantics"""
 
     async def test_no_duplicates_after_pipeline_restart(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        sample_users_table_schema,
     ):
         """Test that events are not duplicated when pipeline restarts"""
         # Setup
@@ -52,7 +56,11 @@ class TestExactlyOnceDelivery:
             # assert second_count["count"] == 1  # No duplicate!
 
     async def test_idempotent_writes_same_event_id(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        sample_users_table_schema,
     ):
         """Test that writing same event_id multiple times is idempotent"""
         # Setup
@@ -84,7 +92,12 @@ class TestExactlyOnceDelivery:
             # assert count["count"] == 1
 
     async def test_offset_prevents_reprocessing(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        postgres_cdc_offsets_table,
+        sample_users_table_schema,
     ):
         """Test that committed offset prevents reprocessing old events"""
         # Setup
@@ -117,7 +130,7 @@ class TestExactlyOnceDelivery:
             await cur.execute(
                 """
                 SELECT events_replicated_count FROM cdc_offsets
-                WHERE table_name = 'users' AND destination = 'POSTGRES'
+                WHERE table_name = 'users'
                 """
             )
             # offset = await cur.fetchone()
