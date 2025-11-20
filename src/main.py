@@ -50,7 +50,7 @@ class CDCPipeline:
         # Initialize components
         self.reader = CommitLogReader(
             cdc_raw_directory=self.config.cassandra.cdc_raw_directory,
-            poll_interval_seconds=self.config.pipeline.poll_interval_seconds,
+            poll_interval_seconds=self.config.pipeline.poll_interval_ms / 1000.0,
         )
         self.offset_manager = OffsetManager()
 
@@ -68,9 +68,13 @@ class CDCPipeline:
 
         # Initialize Postgres sink
         if self.config.destinations.postgres.enabled:
-            postgres_sink = PostgresSink(
-                connection_url=self.config.destinations.postgres.connection_url,
+            # Build connection URL from settings
+            pg_conf = self.config.destinations.postgres
+            connection_url = (
+                f"postgresql://{pg_conf.username or 'postgres'}:"
+                f"{pg_conf.password or 'postgres'}@{pg_conf.host}:{pg_conf.port}/{pg_conf.database}"
             )
+            postgres_sink = PostgresSink(connection_url=connection_url)
             await postgres_sink.connect()
             self.sinks[Destination.POSTGRES] = postgres_sink
             logger.info("Postgres sink initialized")
@@ -88,9 +92,13 @@ class CDCPipeline:
 
         # Initialize TimescaleDB sink
         if self.config.destinations.timescaledb.enabled:
-            timescaledb_sink = TimescaleDBSink(
-                connection_url=self.config.destinations.timescaledb.connection_url,
+            # Build connection URL from settings
+            ts_conf = self.config.destinations.timescaledb
+            connection_url = (
+                f"postgresql://{ts_conf.username or 'postgres'}:"
+                f"{ts_conf.password or 'postgres'}@{ts_conf.host}:{ts_conf.port}/{ts_conf.database}"
             )
+            timescaledb_sink = TimescaleDBSink(connection_url=connection_url)
             await timescaledb_sink.connect()
             self.sinks[Destination.TIMESCALEDB] = timescaledb_sink
             logger.info("TimescaleDB sink initialized")
@@ -190,6 +198,16 @@ class CDCPipeline:
         except Exception as e:
             logger.error("Error writing to sink", destination=sink.destination.value, error=str(e))
             raise
+
+    async def run(self, table_name: str = "users", keyspace: str = "ecommerce") -> None:
+        """
+        Run pipeline continuously with default table/keyspace for testing
+
+        Args:
+            table_name: Table to replicate (default: users)
+            keyspace: Keyspace to replicate (default: ecommerce)
+        """
+        await self.run_continuous(table_name=table_name, keyspace=keyspace)
 
     async def run_continuous(self, table_name: str, keyspace: str) -> None:
         """

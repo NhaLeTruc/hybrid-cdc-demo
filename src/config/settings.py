@@ -14,7 +14,7 @@ class CassandraSettings(BaseSettings):
 
     hosts: List[str] = Field(default=["localhost"], description="Cassandra contact points")
     port: int = Field(default=9042, ge=1, le=65535)
-    keyspace: str = Field(..., description="Cassandra keyspace to monitor")
+    keyspace: str = Field(default="cdc_keyspace", description="Cassandra keyspace to monitor")
     username: Optional[str] = Field(default=None)
     password: Optional[str] = Field(default=None)
     cdc_raw_directory: str = Field(
@@ -29,9 +29,10 @@ class CassandraSettings(BaseSettings):
 class PostgresSettings(BaseSettings):
     """Postgres destination configuration"""
 
+    enabled: bool = Field(default=False, description="Enable Postgres destination")
     host: str = Field(default="localhost")
     port: int = Field(default=5432, ge=1, le=65535)
-    database: str = Field(..., description="Destination database name")
+    database: str = Field(default="cdc_db", description="Destination database name")
     username: Optional[str] = Field(default=None)
     password: Optional[str] = Field(default=None)
     ssl_mode: str = Field(default="require", pattern="^(disable|require|verify-ca|verify-full)$")
@@ -43,9 +44,10 @@ class PostgresSettings(BaseSettings):
 class ClickHouseSettings(BaseSettings):
     """ClickHouse destination configuration"""
 
+    enabled: bool = Field(default=False, description="Enable ClickHouse destination")
     host: str = Field(default="localhost")
     port: int = Field(default=9000, ge=1, le=65535)
-    database: str = Field(..., description="Destination database name")
+    database: str = Field(default="cdc_db", description="Destination database name")
     username: Optional[str] = Field(default=None)
     password: Optional[str] = Field(default=None)
     use_tls: bool = Field(default=True)
@@ -57,9 +59,10 @@ class ClickHouseSettings(BaseSettings):
 class TimescaleDBSettings(BaseSettings):
     """TimescaleDB destination configuration (Postgres extension)"""
 
+    enabled: bool = Field(default=False, description="Enable TimescaleDB destination")
     host: str = Field(default="localhost")
     port: int = Field(default=5432, ge=1, le=65535)
-    database: str = Field(..., description="Destination database name")
+    database: str = Field(default="cdc_db", description="Destination database name")
     username: Optional[str] = Field(default=None)
     password: Optional[str] = Field(default=None)
     ssl_mode: str = Field(default="require", pattern="^(disable|require|verify-ca|verify-full)$")
