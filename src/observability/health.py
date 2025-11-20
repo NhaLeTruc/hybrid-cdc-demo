@@ -141,8 +141,13 @@ async def check_postgres_health(
         from psycopg import AsyncConnection
 
         if connection_url is None:
-            config = CDCSettings()
-            connection_url = config.destinations.postgres.connection_url
+            try:
+                config = CDCSettings()
+                connection_url = config.destinations.postgres.connection_url
+            except Exception as config_error:
+                # If config fails to load, use default localhost connection
+                logger.debug("Failed to load CDCSettings, using default connection", error=str(config_error))
+                connection_url = "postgresql://postgres@localhost:5432/postgres"
 
         start_time = time.time()
 
@@ -219,8 +224,13 @@ async def check_timescaledb_health(
         from psycopg import AsyncConnection
 
         if connection_url is None:
-            config = CDCSettings()
-            connection_url = config.destinations.timescaledb.connection_url
+            try:
+                config = CDCSettings()
+                connection_url = config.destinations.timescaledb.connection_url
+            except Exception as config_error:
+                # If config fails to load, use default localhost connection
+                logger.debug("Failed to load CDCSettings, using default connection", error=str(config_error))
+                connection_url = "postgresql://postgres@localhost:5432/timeseries"
 
         start_time = time.time()
 
@@ -246,9 +256,16 @@ async def check_timescaledb_health(
         return (False, 0.0)
 
 
-async def check_all_dependencies() -> Dict[str, Dict[str, any]]:
+async def check_all_dependencies(
+    postgres_url: Optional[str] = None,
+    timescaledb_url: Optional[str] = None,
+) -> Dict[str, Dict[str, any]]:
     """
     Check health of all dependencies concurrently
+
+    Args:
+        postgres_url: Optional Postgres connection URL
+        timescaledb_url: Optional TimescaleDB connection URL
 
     Returns:
         Dict mapping dependency name to health status
@@ -258,9 +275,9 @@ async def check_all_dependencies() -> Dict[str, Dict[str, any]]:
     # Run all health checks concurrently
     results = await asyncio.gather(
         check_cassandra_health(),
-        check_postgres_health(),
+        check_postgres_health(connection_url=postgres_url),
         check_clickhouse_health(),
-        check_timescaledb_health(),
+        check_timescaledb_health(connection_url=timescaledb_url),
         return_exceptions=True,
     )
 

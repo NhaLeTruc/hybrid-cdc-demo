@@ -245,6 +245,23 @@ async def timescaledb_connection(
 
 
 # ============================================================================
+# Connection URL Fixtures for Health Checks
+# ============================================================================
+
+
+@pytest.fixture(scope="session")
+def postgres_connection_url(postgres_container: PostgresContainer) -> str:
+    """Get Postgres connection URL for health checks"""
+    return postgres_container.get_connection_url().replace("psycopg2", "")
+
+
+@pytest.fixture(scope="session")
+def timescaledb_connection_url(timescaledb_container: PostgresContainer) -> str:
+    """Get TimescaleDB connection URL for health checks"""
+    return timescaledb_container.get_connection_url().replace("psycopg2", "")
+
+
+# ============================================================================
 # Test Data Fixtures
 # ============================================================================
 

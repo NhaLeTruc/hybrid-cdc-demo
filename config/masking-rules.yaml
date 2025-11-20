@@ -1,38 +1,21 @@
 # PII/PHI Masking Rules Configuration
 # Defines which fields should be masked and how
+# Pattern-based matching: field names containing these patterns will be masked
 
-# Table-specific masking rules
-tables:
-  users:
-    pii_fields:
-      - email          # SHA-256 hashed
-      - phone          # SHA-256 hashed
-      - ssn            # SHA-256 hashed
-      - address        # SHA-256 hashed
-    phi_fields: []     # No PHI in users table
-    sensitive_fields: []
+# PII fields (SHA-256 hashed) - these are substring patterns
+pii_fields:
+  - email
+  - phone
+  - ssn
+  - credit_card
+  - address
 
-  patients:
-    pii_fields:
-      - email
-      - phone
-      - ssn
-    phi_fields:
-      - medical_record_number  # HMAC tokenization
-      - diagnosis              # HMAC tokenization
-      - prescription           # HMAC tokenization
-    sensitive_fields: []
-
-  orders:
-    pii_fields: []     # No PII in orders table
-    phi_fields: []
-    sensitive_fields: []
-
-  sessions:
-    pii_fields: []
-    phi_fields: []
-    sensitive_fields:
-      - session_token  # Passthrough (already encrypted)
+# PHI fields (HMAC tokenization) - these are substring patterns
+phi_fields:
+  - medical_record_number
+  - patient_id
+  - diagnosis
+  - prescription
 
 # Global masking configuration
 masking:
@@ -45,9 +28,6 @@ masking:
   phi_strategy: "hmac"
   phi_algorithm: "hmac-sha256"
   phi_key_id: "primary"  # Key loaded from environment variable CDC_PHI_KEY
-
-  # Sensitive data strategy: Passthrough (no transformation)
-  sensitive_strategy: "passthrough"
 
 # Audit configuration
 audit:

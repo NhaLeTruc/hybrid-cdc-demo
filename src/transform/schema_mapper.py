@@ -42,9 +42,11 @@ class SchemaMapper:
             global_mappings = mappings.get("global_mappings", {})
             self.postgres_mappings = global_mappings.get("cassandra_to_postgres", {})
             self.clickhouse_mappings = global_mappings.get("cassandra_to_clickhouse", {})
-            self.timescaledb_mappings = global_mappings.get(
-                "cassandra_to_timescaledb", self.postgres_mappings
-            )
+
+            # TimescaleDB inherits from Postgres, then overrides with specific mappings
+            self.timescaledb_mappings = self.postgres_mappings.copy()
+            timescaledb_overrides = global_mappings.get("cassandra_to_timescaledb", {})
+            self.timescaledb_mappings.update(timescaledb_overrides)
 
             logger.info("Schema mappings loaded")
 
