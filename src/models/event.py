@@ -4,7 +4,7 @@ Based on specs/001-secure-cdc-pipeline/data-model.md
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 from uuid import UUID, uuid4
@@ -62,7 +62,7 @@ class ChangeEvent:
             raise ValueError(f"columns required for {self.event_type} events")
 
         # Validate captured_at
-        if self.captured_at > datetime.now():
+        if self.captured_at > datetime.now(timezone.utc):
             raise ValueError("captured_at cannot be in the future")
 
     @classmethod
@@ -103,7 +103,7 @@ class ChangeEvent:
             columns=columns,
             timestamp_micros=timestamp_micros,
             ttl_seconds=ttl_seconds,
-            captured_at=datetime.now(),
+            captured_at=datetime.now(timezone.utc),
         )
 
     def to_dict(self) -> Dict[str, Any]:
