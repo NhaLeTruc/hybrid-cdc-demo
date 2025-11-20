@@ -76,6 +76,15 @@ def cassandra_session(
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}
         """
     )
+
+    # Create ecommerce keyspace for integration tests
+    session.execute(
+        """
+        CREATE KEYSPACE IF NOT EXISTS ecommerce
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}
+        """
+    )
+
     session.set_keyspace("test_keyspace")
 
     yield session
@@ -259,6 +268,70 @@ def postgres_connection_url(postgres_container: PostgresContainer) -> str:
 def timescaledb_connection_url(timescaledb_container: PostgresContainer) -> str:
     """Get TimescaleDB connection URL for health checks"""
     return timescaledb_container.get_connection_url().replace("psycopg2", "")
+
+
+# ============================================================================
+# Database Table Fixtures
+# ============================================================================
+
+
+@pytest.fixture
+async def postgres_users_table(postgres_connection: AsyncConnection) -> AsyncGenerator[None, None]:
+    """Create users table in Postgres for testing"""
+    async with postgres_connection.cursor() as cur:
+        await cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id UUID PRIMARY KEY,
+                email TEXT,
+                phone TEXT,
+                first_name TEXT,
+                last_name TEXT,
+                age INTEGER,
+                city TEXT,
+                created_at TIMESTAMP
+            )
+        """)
+    await postgres_connection.commit()
+    yield
+    # Cleanup handled by cleanup_test_data fixture
+
+
+@pytest.fixture
+async def postgres_cdc_offsets_table(postgres_connection: AsyncConnection) -> AsyncGenerator[None, None]:
+    """Create cdc_offsets table in Postgres for testing"""
+    async with postgres_connection.cursor() as cur:
+        await cur.execute("""
+            CREATE TABLE IF NOT EXISTS cdc_offsets (
+                table_name TEXT PRIMARY KEY,
+                commitlog_position BIGINT NOT NULL,
+                events_replicated_count BIGINT DEFAULT 0,
+                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    await postgres_connection.commit()
+    yield
+    # Cleanup handled by cleanup_test_data fixture
+
+
+@pytest.fixture
+async def timescaledb_users_table(timescaledb_connection: AsyncConnection) -> AsyncGenerator[None, None]:
+    """Create users table in TimescaleDB for testing"""
+    async with timescaledb_connection.cursor() as cur:
+        await cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id UUID PRIMARY KEY,
+                email TEXT,
+                phone TEXT,
+                first_name TEXT,
+                last_name TEXT,
+                age INTEGER,
+                city TEXT,
+                created_at TIMESTAMP
+            )
+        """)
+    await timescaledb_connection.commit()
+    yield
+    # Cleanup handled by cleanup_test_data fixture
 
 
 # ============================================================================

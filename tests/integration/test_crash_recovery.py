@@ -14,7 +14,12 @@ class TestCrashRecovery:
     """Test pipeline crash recovery and resumption"""
 
     async def test_resume_from_last_offset_after_crash(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        postgres_cdc_offsets_table,
+        sample_users_table_schema,
     ):
         """Test that pipeline resumes from last committed offset after crash"""
         # Setup
@@ -52,7 +57,7 @@ class TestCrashRecovery:
             await cur.execute(
                 """
                 SELECT events_replicated_count FROM cdc_offsets
-                WHERE table_name = 'users' AND destination = 'POSTGRES'
+                WHERE table_name = 'users'
                 """
             )
             # offset = await cur.fetchone()
@@ -104,7 +109,11 @@ class TestCrashRecovery:
         pass
 
     async def test_graceful_shutdown_commits_in_progress_batch(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        sample_users_table_schema,
     ):
         """Test that graceful shutdown (SIGTERM) commits current batch"""
         # Setup

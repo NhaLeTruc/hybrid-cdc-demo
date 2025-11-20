@@ -14,7 +14,11 @@ class TestCassandraToTimescaleDB:
     """Test end-to-end replication from Cassandra to TimescaleDB"""
 
     async def test_insert_event_replicates_to_timescaledb(
-        self, cassandra_session, timescaledb_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        timescaledb_connection,
+        timescaledb_users_table,
+        sample_users_table_schema,
     ):
         """Test that INSERT in Cassandra replicates to TimescaleDB"""
         # Setup

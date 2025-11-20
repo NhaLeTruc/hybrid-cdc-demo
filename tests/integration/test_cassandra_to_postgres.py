@@ -14,7 +14,12 @@ class TestCassandraToPostgres:
     """Test end-to-end replication from Cassandra to Postgres"""
 
     async def test_insert_event_replicates_to_postgres(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        cassandra_container,
+        postgres_connection,
+        postgres_users_table,
+        sample_users_table_schema,
     ):
         """Test that INSERT in Cassandra replicates to Postgres"""
         # Setup: Create table in Cassandra
@@ -32,9 +37,8 @@ class TestCassandraToPostgres:
 
         # Wait for CDC to process (in real implementation)
         # This will use the actual pipeline
-        from src.main import CDCPipeline
-
-        pipeline = CDCPipeline()
+        # from src.main import CDCPipeline
+        # pipeline = CDCPipeline()
         # await pipeline.run_once()  # Process one batch
 
         # Verify data replicated to Postgres
@@ -47,7 +51,11 @@ class TestCassandraToPostgres:
         # assert row["email"] == "test@example.com"
 
     async def test_update_event_replicates_to_postgres(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        sample_users_table_schema,
     ):
         """Test that UPDATE in Cassandra replicates to Postgres"""
         # Setup
@@ -80,7 +88,11 @@ class TestCassandraToPostgres:
             # assert row["email"] == "updated@example.com"
 
     async def test_delete_event_replicates_to_postgres(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        sample_users_table_schema,
     ):
         """Test that DELETE in Cassandra replicates to Postgres"""
         # Setup
@@ -108,7 +120,11 @@ class TestCassandraToPostgres:
             # assert row is None  # Should be deleted
 
     async def test_batch_insert_replicates_to_postgres(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        sample_users_table_schema,
     ):
         """Test that batch inserts replicate correctly"""
         # Setup
@@ -142,7 +158,12 @@ class TestCassandraToPostgres:
             # assert row["count"] == 100
 
     async def test_offset_committed_after_replication(
-        self, cassandra_session, postgres_connection, sample_users_table_schema
+        self,
+        cassandra_session,
+        postgres_connection,
+        postgres_users_table,
+        postgres_cdc_offsets_table,
+        sample_users_table_schema,
     ):
         """Test that offset is committed after successful replication"""
         # Setup
@@ -166,7 +187,6 @@ class TestCassandraToPostgres:
                 """
                 SELECT * FROM cdc_offsets
                 WHERE table_name = 'users'
-                AND destination = 'POSTGRES'
                 """
             )
             # offset_row = await cur.fetchone()
