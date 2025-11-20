@@ -4,7 +4,7 @@ Based on specs/001-secure-cdc-pipeline/data-model.md
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from uuid import UUID, uuid4
 
@@ -61,7 +61,8 @@ class ReplicationOffset:
             raise ValueError("last_event_timestamp_micros must be non-negative")
 
         # Validate committed_at
-        if self.last_committed_at > datetime.now():
+        # Use timezone-aware comparison since last_committed_at comes from DB with timezone
+        if self.last_committed_at > datetime.now(timezone.utc):
             raise ValueError("last_committed_at cannot be in the future")
 
         # Validate events count

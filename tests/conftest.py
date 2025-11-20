@@ -148,6 +148,9 @@ def clickhouse_client(
     """
     Create a ClickHouse client connected to the testcontainer
 
+    ClickHouse 23+ requires authentication. Testcontainers creates
+    a default user with username="test" and password="test".
+
     Args:
         clickhouse_container: Running ClickHouse container
 
@@ -158,6 +161,8 @@ def clickhouse_client(
         host=clickhouse_container.get_container_host_ip(),
         port=clickhouse_container.get_exposed_port(9000),
         database="default",
+        user=clickhouse_container.username,
+        password=clickhouse_container.password,
     )
     yield client
     client.disconnect()
@@ -176,7 +181,7 @@ def timescaledb_container() -> Generator[PostgresContainer, None, None]:
     Yields:
         Running PostgresContainer with TimescaleDB extension
     """
-    container = PostgresContainer("timescale/timescaledb:2.13-pg15", driver=None)
+    container = PostgresContainer("timescale/timescaledb:2.23.1-pg15", driver=None)
     container.start()
     yield container
     container.stop()
@@ -283,5 +288,5 @@ async def cleanup_test_data(
     async with timescaledb_connection.cursor() as cur:
         await cur.execute("DROP SCHEMA IF EXISTS public CASCADE;")
         await cur.execute("CREATE SCHEMA public;")
-        await cur.execute("CREATE EXTENSION IF NOT EXISTS timescaledb;")
+        # TimescaleDB extension is already installed at database level, no need to recreate
     await timescaledb_connection.commit()
