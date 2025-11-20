@@ -109,7 +109,7 @@ async def postgres_connection(
     postgres_container: PostgresContainer,
 ) -> AsyncGenerator[AsyncConnection, None]:
     """
-    Create an async Postgres connection to the testcontainer
+    Create an async Postgres connection to the testcontainer with transaction rollback support
 
     Args:
         postgres_container: Running Postgres container
@@ -117,9 +117,21 @@ async def postgres_connection(
     Yields:
         Async Postgres connection
     """
+    import psycopg.pq
+
     connection_url = postgres_container.get_connection_url().replace("psycopg2", "")
-    async with await AsyncConnection.connect(connection_url) as conn:
-        yield conn
+    conn = await AsyncConnection.connect(connection_url)
+
+    yield conn
+
+    # CRITICAL FIX: Rollback any failed transactions before closing
+    try:
+        if conn.info.transaction_status == psycopg.pq.TransactionStatus.INERROR:
+            await conn.rollback()
+    except Exception:
+        pass  # Connection might already be closed
+    finally:
+        await conn.close()
 
 
 # ============================================================================
@@ -168,6 +180,16 @@ def clickhouse_client(
     client.disconnect()
 
 
+@pytest.fixture
+def clickhouse_connection(clickhouse_client: ClickHouseClient) -> Generator[ClickHouseClient, None, None]:
+    """
+    Alias for clickhouse_client to match test expectations.
+
+    Some tests expect 'clickhouse_connection' instead of 'clickhouse_client'.
+    """
+    yield clickhouse_client
+
+
 # ============================================================================
 # TimescaleDB Testcontainer
 # ============================================================================
@@ -192,7 +214,7 @@ async def timescaledb_connection(
     timescaledb_container: PostgresContainer,
 ) -> AsyncGenerator[AsyncConnection, None]:
     """
-    Create an async TimescaleDB connection to the testcontainer
+    Create an async TimescaleDB connection to the testcontainer with transaction rollback support
 
     Args:
         timescaledb_container: Running TimescaleDB container
@@ -200,13 +222,26 @@ async def timescaledb_connection(
     Yields:
         Async TimescaleDB connection
     """
+    import psycopg.pq
+
     connection_url = timescaledb_container.get_connection_url().replace("psycopg2", "")
-    async with await AsyncConnection.connect(connection_url) as conn:
-        # Enable TimescaleDB extension
-        async with conn.cursor() as cur:
-            await cur.execute("CREATE EXTENSION IF NOT EXISTS timescaledb;")
-        await conn.commit()
-        yield conn
+    conn = await AsyncConnection.connect(connection_url)
+
+    # Enable TimescaleDB extension
+    async with conn.cursor() as cur:
+        await cur.execute("CREATE EXTENSION IF NOT EXISTS timescaledb;")
+    await conn.commit()
+
+    yield conn
+
+    # CRITICAL FIX: Rollback any failed transactions before closing
+    try:
+        if conn.info.transaction_status == psycopg.pq.TransactionStatus.INERROR:
+            await conn.rollback()
+    except Exception:
+        pass  # Connection might already be closed
+    finally:
+        await conn.close()
 
 
 # ============================================================================
@@ -268,25 +303,58 @@ async def cleanup_test_data(
     timescaledb_connection: AsyncConnection,
 ) -> AsyncGenerator[None, None]:
     """
-    Automatically cleanup test data after each test
+    Automatically cleanup test data after each test with deadlock prevention
 
     This fixture runs after every test to ensure clean state
     """
     yield
 
-    # Cleanup Postgres
-    async with postgres_connection.cursor() as cur:
-        await cur.execute("DROP SCHEMA IF EXISTS public CASCADE;")
-        await cur.execute("CREATE SCHEMA public;")
-    await postgres_connection.commit()
+    # CRITICAL FIX: Cleanup Postgres with deadlock prevention
+    try:
+        # Rollback any pending transaction first
+        await postgres_connection.rollback()
+
+        async with postgres_connection.cursor() as cur:
+            # Terminate other connections to avoid deadlocks
+            await cur.execute("""
+                SELECT pg_terminate_backend(pg_stat_activity.pid)
+                FROM pg_stat_activity
+                WHERE pg_stat_activity.datname = current_database()
+                  AND pid <> pg_backend_pid();
+            """)
+
+            # Now safe to drop schema
+            await cur.execute("DROP SCHEMA IF EXISTS public CASCADE;")
+            await cur.execute("CREATE SCHEMA public;")
+        await postgres_connection.commit()
+    except Exception:
+        pass  # Ignore cleanup errors
 
     # Cleanup ClickHouse
-    clickhouse_client.execute("DROP DATABASE IF EXISTS test_db;")
-    clickhouse_client.execute("CREATE DATABASE IF NOT EXISTS test_db;")
+    try:
+        clickhouse_client.execute("DROP DATABASE IF EXISTS test_db;")
+        clickhouse_client.execute("CREATE DATABASE IF NOT EXISTS test_db;")
+    except Exception:
+        pass
 
-    # Cleanup TimescaleDB
-    async with timescaledb_connection.cursor() as cur:
-        await cur.execute("DROP SCHEMA IF EXISTS public CASCADE;")
-        await cur.execute("CREATE SCHEMA public;")
-        # TimescaleDB extension is already installed at database level, no need to recreate
-    await timescaledb_connection.commit()
+    # CRITICAL FIX: Cleanup TimescaleDB with deadlock prevention
+    try:
+        # Rollback any pending transaction first
+        await timescaledb_connection.rollback()
+
+        async with timescaledb_connection.cursor() as cur:
+            # Terminate other connections to avoid deadlocks
+            await cur.execute("""
+                SELECT pg_terminate_backend(pg_stat_activity.pid)
+                FROM pg_stat_activity
+                WHERE pg_stat_activity.datname = current_database()
+                  AND pid <> pg_backend_pid();
+            """)
+
+            # Now safe to drop schema
+            await cur.execute("DROP SCHEMA IF EXISTS public CASCADE;")
+            await cur.execute("CREATE SCHEMA public;")
+            # TimescaleDB extension is already installed at database level, no need to recreate
+        await timescaledb_connection.commit()
+    except Exception:
+        pass  # Ignore cleanup errors

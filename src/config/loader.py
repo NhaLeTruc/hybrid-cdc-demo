@@ -107,3 +107,62 @@ def load_schema_mappings(file_path: str) -> Dict[str, Any]:
         Dictionary containing type mappings per table
     """
     return load_yaml_config(file_path)
+
+
+def load_config(config_path: str | None = None):
+    """
+    Load CDC pipeline configuration from YAML file or environment variables.
+
+    This is the main entry point for loading configuration. It supports:
+    - Loading from YAML file if config_path is provided
+    - Loading from environment variables if config_path is None
+    - Merging YAML config with environment variable overrides
+
+    Args:
+        config_path: Optional path to YAML config file. If None, uses environment variables.
+
+    Returns:
+        CDCSettings: Validated configuration object
+
+    Raises:
+        FileNotFoundError: If config file specified but not found
+        yaml.YAMLError: If YAML parsing fails
+        ValidationError: If configuration validation fails
+
+    Examples:
+        >>> # Load from environment variables
+        >>> config = load_config()
+
+        >>> # Load from YAML file
+        >>> config = load_config("config/pipeline.yaml")
+    """
+    from src.config.settings import CDCSettings
+
+    if config_path:
+        # Load from YAML file
+        try:
+            yaml_config = load_yaml_config(config_path)
+            logger.info(f"Loaded configuration from {config_path}")
+
+            # Create CDCSettings from YAML, allowing env vars to override
+            config = CDCSettings(**yaml_config)
+        except FileNotFoundError as e:
+            logger.error(f"Configuration file not found: {config_path}")
+            raise
+        except yaml.YAMLError as e:
+            logger.error(f"Invalid YAML in configuration file: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to load configuration from {config_path}: {e}")
+            raise
+    else:
+        # Load from environment variables
+        try:
+            config = CDCSettings()
+            logger.info("Loaded configuration from environment variables")
+        except Exception as e:
+            logger.error(f"Failed to load configuration from environment: {e}")
+            raise
+
+    logger.debug(f"Configuration loaded successfully")
+    return config
